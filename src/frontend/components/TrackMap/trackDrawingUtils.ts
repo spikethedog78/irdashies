@@ -10,12 +10,6 @@ export const setupCanvasContext = (
   ctx.save();
   ctx.translate(offsetX, offsetY);
   ctx.scale(scale, scale);
-  
-  // Apply shadow
-  ctx.shadowColor = 'black';
-  ctx.shadowBlur = 2;
-  ctx.shadowOffsetX = 1;
-  ctx.shadowOffsetY = 1;
 };
 
 export const drawTrack = (
@@ -43,7 +37,10 @@ export const drawTrack = (
 
 export const drawStartFinishLine = (
   ctx: CanvasRenderingContext2D,
-  startFinishLine: { point: { x: number; y: number }; perpendicular: { x: number; y: number } } | null
+  startFinishLine: {
+    point: { x: number; y: number };
+    perpendicular: { x: number; y: number };
+  } | null
 ) => {
   if (!startFinishLine) return;
 
@@ -88,7 +85,13 @@ export const drawTurnNames = (
 
 export const drawDrivers = (
   ctx: CanvasRenderingContext2D,
-  calculatePositions: Record<number, TrackDriver & { position: { x: number; y: number }; sessionPosition?: number }>,
+  calculatePositions: Record<
+    number,
+    TrackDriver & {
+      position: { x: number; y: number };
+      sessionPosition?: number;
+    }
+  >,
   driverColors: Record<number, { fill: string; text: string }>,
   driversOffTrack: boolean[],
   driverCircleSize: number,
@@ -124,7 +127,10 @@ export const drawDrivers = (
         ctx.font = `${fontSize}px sans-serif`;
         let displayText = '';
         if (displayMode === 'sessionPosition') {
-          displayText = sessionPosition !== undefined && sessionPosition > 0 ? sessionPosition.toString() : '';
+          displayText =
+            sessionPosition !== undefined && sessionPosition > 0
+              ? sessionPosition.toString()
+              : '';
         } else {
           displayText = driver.CarNumber;
         }
@@ -134,4 +140,4 @@ export const drawDrivers = (
         }
       }
     });
-}; 
+};
