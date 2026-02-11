@@ -26,6 +26,9 @@ export default {
     enableTurnNames: {
       control: { type: 'boolean' },
     },
+    turnFontSize: {
+      control: { type: 'range', min: 10, max: 100, step: 1 },
+    },
     showCarNumbers: {
       control: { type: 'boolean' },
     },
@@ -354,6 +357,7 @@ export const Primary: Story = {
     trackId: 1,
     drivers: sampleData,
     enableTurnNames: true,
+    turnFontSize: 40,
     showCarNumbers: true,
     invertTrackColors: false,
     driverCircleSize: 40,
@@ -370,6 +374,7 @@ export const InvertedTrackColors: Story = {
     trackId: 1,
     drivers: sampleData,
     enableTurnNames: true,
+    turnFontSize: 40,
     showCarNumbers: true,
     invertTrackColors: true,
     driverCircleSize: 40,
@@ -386,6 +391,7 @@ export const SingleClass: Story = {
     trackId: 1,
     drivers: sampleData.filter(({ driver }) => driver.CarClassID === 2),
     enableTurnNames: true,
+    turnFontSize: 40,
     showCarNumbers: true,
     invertTrackColors: false,
     driverCircleSize: 40,
@@ -436,6 +442,7 @@ export const SingleDriver: Story = {
         trackId={args.trackId}
         drivers={drivers}
         enableTurnNames={args.enableTurnNames}
+        turnFontSize={args.turnFontSize ?? 40}
         showCarNumbers={args.showCarNumbers ?? true}
         invertTrackColors={args.invertTrackColors ?? false}
         driverCircleSize={args.driverCircleSize ?? 40}
@@ -477,6 +484,7 @@ export const CirclingAround: Story = {
         trackId={args.trackId}
         drivers={drivers}
         enableTurnNames={args.enableTurnNames}
+        turnFontSize={args.turnFontSize ?? 40}
         showCarNumbers={args.showCarNumbers ?? true}
         invertTrackColors={args.invertTrackColors ?? false}
         driverCircleSize={args.driverCircleSize ?? 40}
@@ -529,6 +537,7 @@ export const CirclingAroundSingleDriver: Story = {
         trackId={args.trackId}
         drivers={drivers}
         enableTurnNames={args.enableTurnNames}
+        turnFontSize={args.turnFontSize ?? 40}
         showCarNumbers={args.showCarNumbers ?? true}
         invertTrackColors={args.invertTrackColors ?? false}
         driverCircleSize={args.driverCircleSize ?? 40}
@@ -585,6 +594,7 @@ export const AllTracksGrid: Story = {
                   trackId={trackId}
                   drivers={sampleData}
                   enableTurnNames={args.enableTurnNames}
+                  turnFontSize={args.turnFontSize ?? 40}
                   showCarNumbers={args.showCarNumbers ?? true}
                   invertTrackColors={args.invertTrackColors ?? false}
                   driverCircleSize={args.driverCircleSize ?? 40}
@@ -636,6 +646,7 @@ export const BrokenTracksGrid: Story = {
                   trackId={brokenTrack.id}
                   drivers={sampleData}
                   enableTurnNames={args.enableTurnNames}
+                  turnFontSize={args.turnFontSize ?? 40}
                   showCarNumbers={args.showCarNumbers ?? true}
                   invertTrackColors={args.invertTrackColors ?? false}
                   driverCircleSize={args.driverCircleSize ?? 40}

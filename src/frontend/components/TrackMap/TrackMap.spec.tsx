@@ -32,6 +32,7 @@ describe('TrackMap', () => {
   it('should render when all conditions are met', () => {
     vi.mocked(useTrackMapSettings).mockReturnValue({
       enableTurnNames: false,
+      turnFontSize: 40,
       showCarNumbers: true,
       displayMode: 'carNumber',
       invertTrackColors: false,
@@ -54,6 +55,7 @@ describe('TrackMap', () => {
   it('should hide when showOnlyWhenOnTrack is true and player is not on track', () => {
     vi.mocked(useTrackMapSettings).mockReturnValue({
       enableTurnNames: false,
+      turnFontSize: 40,
       showCarNumbers: true,
       displayMode: 'carNumber',
       invertTrackColors: false,
@@ -76,6 +78,7 @@ describe('TrackMap', () => {
   it('should show when showOnlyWhenOnTrack is true and player is on track', () => {
     vi.mocked(useTrackMapSettings).mockReturnValue({
       enableTurnNames: false,
+      turnFontSize: 40,
       showCarNumbers: true,
       displayMode: 'carNumber',
       invertTrackColors: false,
@@ -98,6 +101,7 @@ describe('TrackMap', () => {
   it('should hide when session visibility is false', () => {
     vi.mocked(useTrackMapSettings).mockReturnValue({
       enableTurnNames: false,
+      turnFontSize: 40,
       showCarNumbers: true,
       displayMode: 'carNumber',
       invertTrackColors: false,
@@ -121,6 +125,7 @@ describe('TrackMap', () => {
   it('should hide when trackId is not available', () => {
     vi.mocked(useTrackMapSettings).mockReturnValue({
       enableTurnNames: false,
+      turnFontSize: 40,
       showCarNumbers: true,
       displayMode: 'carNumber',
       invertTrackColors: false,
@@ -144,6 +149,7 @@ describe('TrackMap', () => {
   it('should pass displayMode setting to TrackCanvas', () => {
     vi.mocked(useTrackMapSettings).mockReturnValue({
       enableTurnNames: false,
+      turnFontSize: 40,
       showCarNumbers: true,
       displayMode: 'sessionPosition',
       invertTrackColors: false,

@@ -71,17 +71,16 @@ export const drawTurnNames = (
   ctx: CanvasRenderingContext2D,
   turns: TrackDrawing['turns'],
   enableTurnNames: boolean | undefined,
-  trackmapFontSize: number
+  turnFontSize: number
 ) => {
   if (!enableTurnNames || !turns) return;
 
   turns.forEach((turn) => {
     if (!turn.content || !turn.x || !turn.y) return;
-    const fontSize = 2 * (trackmapFontSize / 100);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = 'white';
-    ctx.font = `${fontSize}rem sans-serif`;
+    ctx.font = `${turnFontSize}px sans-serif`;
     ctx.fillText(turn.content, turn.x, turn.y);
   });
 };

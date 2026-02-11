@@ -491,6 +491,7 @@ export const defaultDashboard: DashboardLayout = {
       },
       config: {
         enableTurnNames: false,
+        turnFontSize: 40,
         showCarNumbers: true,
         invertTrackColors: false,
         driverCircleSize: 40,

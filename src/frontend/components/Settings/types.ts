@@ -251,6 +251,7 @@ export interface WeatherWidgetSettings extends BaseWidgetSettings {
 export interface TrackMapWidgetSettings extends BaseWidgetSettings {
   config: {
     enableTurnNames: boolean;
+    turnFontSize: number,
     showCarNumbers: boolean;
     displayMode: 'carNumber' | 'sessionPosition';
     invertTrackColors: boolean;

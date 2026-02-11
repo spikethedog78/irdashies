@@ -18,6 +18,7 @@ export interface TrackProps {
   trackId: number;
   drivers: TrackDriver[];
   enableTurnNames?: boolean;
+  turnFontSize?: number;
   showCarNumbers?: boolean;
   displayMode?: 'carNumber' | 'sessionPosition';
   invertTrackColors?: boolean;
@@ -64,6 +65,7 @@ export const TrackCanvas = ({
   trackId,
   drivers,
   enableTurnNames,
+  turnFontSize = 40,
   showCarNumbers = true,
   displayMode = 'carNumber',
   invertTrackColors = false,
@@ -259,7 +261,7 @@ export const TrackCanvas = ({
     // Draw all elements
     drawTrack(ctx, path2DObjects, invertTrackColors, trackLineWidth, trackOutlineWidth);
     drawStartFinishLine(ctx, startFinishLine);
-    drawTurnNames(ctx, trackDrawing.turns, enableTurnNames, trackmapFontSize);
+    drawTurnNames(ctx, trackDrawing.turns, enableTurnNames, turnFontSize);
     drawDrivers(ctx, calculatePositions, driverColors, driversOffTrack, driverCircleSize, playerCircleSize, trackmapFontSize, showCarNumbers, displayMode);
 
     // Restore context state

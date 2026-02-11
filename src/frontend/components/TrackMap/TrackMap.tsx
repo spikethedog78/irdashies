@@ -29,6 +29,7 @@ export const TrackMap = () => {
         trackId={trackId}
         drivers={driversTrackData}
         enableTurnNames={settings?.enableTurnNames ?? false}
+        turnFontSize={settings?.turnFontSize ?? 40}
         showCarNumbers={settings?.showCarNumbers ?? true}
         displayMode={settings?.displayMode ?? 'carNumber'}
         invertTrackColors={settings?.invertTrackColors ?? false}

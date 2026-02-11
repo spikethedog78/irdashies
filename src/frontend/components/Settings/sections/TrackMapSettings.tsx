@@ -9,6 +9,7 @@ const SETTING_ID = 'map';
 
 const defaultConfig: TrackMapWidgetSettings['config'] = {
   enableTurnNames: false,
+  turnFontSize: 40,
   showCarNumbers: true,
   displayMode: 'carNumber',
   invertTrackColors: false,
@@ -28,6 +29,7 @@ const migrateConfig = (savedConfig: unknown): TrackMapWidgetSettings['config'] =
   const config = savedConfig as Record<string, unknown>;
   return {
     enableTurnNames: (config.enableTurnNames as boolean) ?? defaultConfig.enableTurnNames,
+    turnFontSize: (config.turnFontSize as number) ?? defaultConfig.turnFontSize,
     showCarNumbers: (config.showCarNumbers as boolean) ?? defaultConfig.showCarNumbers,
     displayMode: (config.displayMode as 'carNumber' | 'sessionPosition') ?? defaultConfig.displayMode,
     invertTrackColors: (config.invertTrackColors as boolean) ?? defaultConfig.invertTrackColors,
@@ -77,6 +79,26 @@ export const TrackMapSettings = () => {
                 enableTurnNames: enabled
               })}
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-slate-300">
+              Font Size For Turns Names: {settings.config.turnFontSize ?? 40}px
+            </label>
+            <input
+              type="range"
+              min="40"
+              max="80"
+              step="1"
+              value={settings.config.turnFontSize ?? 40}
+              onChange={(e) =>
+                handleConfigChange({ turnFontSize: parseInt(e.target.value) || 40 })
+              }
+              className="w-full"
+            />
+            <p className="text-slate-400 text-sm">
+              Relative size of the font within the track map
+            </p>
           </div>
 
           <div className="flex items-center justify-between">
