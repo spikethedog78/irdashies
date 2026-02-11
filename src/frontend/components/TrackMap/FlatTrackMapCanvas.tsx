@@ -190,9 +190,8 @@ export const FlatTrackMapCanvas = ({
         } else {
           displayText = driver.CarNumber;
         }
-        if (displayText) {
-          const opticalOffsetY = (radius / 20) * (trackmapFontSize / 100); // tweak value
-          ctx.fillText(displayText, x, centerY + opticalOffsetY); // tweak value);
+        if (displayText) {         
+          ctx.fillText(displayText, x, centerY); // tweak value);
         }
       }
     });
