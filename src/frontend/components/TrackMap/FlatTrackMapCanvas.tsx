@@ -223,7 +223,8 @@ export const FlatTrackMapCanvas = ({
             displayText = driver.CarNumber;
           }
           if (displayText) {
-            ctx.fillText(displayText, x, centerY);
+            const visualOffset = Math.round(radius / 14) * (trackmapFontSize / 100);
+            ctx.fillText(displayText, x, centerY + visualOffset);
           }
         }
       });
