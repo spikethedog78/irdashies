@@ -179,23 +179,40 @@ export const FlatTrackMapCanvas = ({
         ctx.stroke();
       }
 
-      if (showCarNumbers) {
-        ctx.fillStyle = color.text;
-        ctx.font = `${fontSize}px sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        let displayText = '';
-        if (displayMode === 'sessionPosition') {
-          displayText = classPosition !== undefined && classPosition > 0 ? classPosition.toString() : '';
-        } else {
-          displayText = driver.CarNumber;
+        if (showCarNumbers) {
+          ctx.fillStyle = color.text;
+          ctx.font = `${fontSize}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          let displayText = '';
+          if (displayMode === 'sessionPosition') {
+            displayText =
+              classPosition !== undefined && classPosition > 0
+                ? classPosition.toString()
+                : '';
+          } else {
+            displayText = driver.CarNumber;
+          }
+          if (displayText) {
+            const visualOffset = Math.round(radius / 14) * (trackmapFontSize / 100);
+            ctx.fillText(displayText, x, centerY + visualOffset);
+          }
         }
-        if (displayText) {         
-          ctx.fillText(displayText, x, centerY); // tweak value);
-        }
-      }
-    });
-  }, [canvasSize, drivers, driverColors, driversOffTrack, showCarNumbers, displayMode, driverCircleSize, playerCircleSize, trackmapFontSize, trackLineWidth, trackOutlineWidth, invertTrackColors]);
+      });
+  }, [
+    canvasSize,
+    drivers,
+    driverColors,
+    driversOffTrack,
+    showCarNumbers,
+    displayMode,
+    driverCircleSize,
+    playerCircleSize,
+    trackmapFontSize,
+    trackLineWidth,
+    trackOutlineWidth,
+    invertTrackColors,
+  ]);
 
   return <div className="w-full h-full"><canvas ref={canvasRef} className="w-full h-full" /></div>;
 };
