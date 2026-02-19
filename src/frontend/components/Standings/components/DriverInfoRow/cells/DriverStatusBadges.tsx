@@ -98,54 +98,48 @@ export const DriverStatusBadges = memo(
         className={`flex flex-row-reverse items-center gap-0.5 ${className}`}
       >
         {penalty && (
-          <StatusBadge
-            textColor="text-orange-500"
-            borderColorClass="border-gray-500"
-            additionalClasses="bg-black/80 inline-block min-w-6"
-          >
+          <StatusBadge textColor="text-orange-500" borderColorClass="border-gray-500" additionalClasses="bg-black/80 inline-block min-w-7">
             {'\u00A0'}
           </StatusBadge>
         )}
         {slowdown && (
-          <StatusBadge
-            textColor="text-orange-500"
-            borderColorClass="border-gray-500"
-            animate
-            additionalClasses="bg-black/80 inline-block min-w-6"
-          >
+          <StatusBadge textColor="text-orange-500" borderColorClass="border-gray-500" animate additionalClasses="bg-black/80 inline-block min-w-7">
             {'\u00A0'}
           </StatusBadge>
         )}
         {repair && (
-          <StatusBadge
-            textColor="text-orange-500"
-            borderColorClass="border-gray-500"
-            additionalClasses="bg-black/80 items-center justify-center"
-          >
-            <span className="inline-block w-[0.8em] h-[0.8em] bg-orange-500 rounded-full" />
+          <StatusBadge textColor="text-orange-500" borderColorClass="border-gray-500" additionalClasses="bg-black/80 items-center justify-center min-w-7">
+            <span className="inline-block w-[0.8em] h-[0.8em] bg-orange-500 rounded-full"/>
           </StatusBadge>
-        )}
-        {dnf && (
-          <StatusBadge borderColorClass="border-red-500">DNF</StatusBadge>
-        )}
+        )}        
         {tow && (
-          <StatusBadge borderColorClass="border-orange-500" animate>
+          <StatusBadge borderColorClass="border-orange-500" additionalClasses="min-w-[4.5em]" animate>
             TOW
           </StatusBadge>
         )}
         {out && (
-          <StatusBadge borderColorClass="border-green-700">
-            OUT {pitDuration}
+          <StatusBadge borderColorClass="border-green-700" additionalClasses="min-w-[4.5em]">
+            OUT 
           </StatusBadge>
         )}
         {pit && (
-          <StatusBadge borderColorClass="border-yellow-500" animate>
+          <StatusBadge borderColorClass="border-yellow-500" additionalClasses="min-w-[4.5em]" animate>
             PIT
           </StatusBadge>
         )}
         {lastPit && !out && (
-          <StatusBadge borderColorClass="border-yellow-500">
-            L {pitLap} {pitDuration}
+          <StatusBadge borderColorClass="border-yellow-500" additionalClasses="min-w-[4.5em]">
+             L {pitLap}
+          </StatusBadge>
+        )}
+        {lastPit && pitStopDuration && (
+          <StatusBadge borderColorClass="border-yellow-700">
+             {pitDuration}
+          </StatusBadge>
+        )}        
+        {dnf && (
+          <StatusBadge borderColorClass="border-red-500" additionalClasses="min-w-[4.5em]">
+            DNF
           </StatusBadge>
         )}
       </div>
