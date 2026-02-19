@@ -17,7 +17,7 @@ const StatusBadge = ({
   additionalClasses = '',
 }: StatusBadgeProps) => {
   const baseClasses =
-    'text-xs border-2 rounded-md text-center text-nowrap px-2 m-0 leading-tight';
+    'text-xs border-2 rounded-md text-center text-nowrap px-1 m-0 leading-tight';
   const animationClass = animate ? 'animate-pulse' : '';
 
   return (
@@ -85,47 +85,47 @@ export const DriverStatusBadges = memo(
     return (
       <div className={`flex flex-row-reverse items-center gap-0.5 ${className}`}>
         {penalty && (
-          <StatusBadge textColor="text-orange-500" borderColorClass="border-gray-500" additionalClasses="bg-black/80 inline-block min-w-7">
+          <StatusBadge textColor="text-orange-500" borderColorClass="border-gray-500" additionalClasses="bg-black/80 inline-block min-w-6">
             {'\u00A0'}
           </StatusBadge>
         )}
         {slowdown && (
-          <StatusBadge textColor="text-orange-500" borderColorClass="border-gray-500" animate additionalClasses="bg-black/80 inline-block min-w-7">
+          <StatusBadge textColor="text-orange-500" borderColorClass="border-gray-500" animate additionalClasses="bg-black/80 inline-block min-w-6">
             {'\u00A0'}
           </StatusBadge>
         )}
         {repair && (
-          <StatusBadge textColor="text-orange-500" borderColorClass="border-gray-500" additionalClasses="bg-black/80 items-center justify-center min-w-7">
+          <StatusBadge textColor="text-orange-500" borderColorClass="border-gray-500" additionalClasses="bg-black/80 items-center justify-center min-w-6">
             <span className="inline-block w-[0.8em] h-[0.8em] bg-orange-500 rounded-full"/>
           </StatusBadge>
         )}        
         {tow && (
-          <StatusBadge borderColorClass="border-orange-500" additionalClasses="min-w-[4.5em]" animate>
+          <StatusBadge borderColorClass="border-orange-500" additionalClasses="min-w-[3.6em]" animate>
             TOW
           </StatusBadge>
         )}
         {out && (
-          <StatusBadge borderColorClass="border-green-700" additionalClasses="min-w-[4.5em]">
+          <StatusBadge borderColorClass="border-green-700" additionalClasses="min-w-[3.6em]">
             OUT 
           </StatusBadge>
         )}
         {pit && (
-          <StatusBadge borderColorClass="border-yellow-500" additionalClasses="min-w-[4.5em]" animate>
+          <StatusBadge borderColorClass="border-yellow-500" additionalClasses="min-w-[3.6em]" animate>
             PIT
           </StatusBadge>
         )}
         {lastPit && !out && (
-          <StatusBadge borderColorClass="border-yellow-500" additionalClasses="min-w-[4.5em]">
+          <StatusBadge borderColorClass="border-yellow-500" additionalClasses="min-w-[3.6em]">
              L {pitLap}
           </StatusBadge>
         )}
         {lastPit && pitStopDuration && (
-          <StatusBadge borderColorClass="border-yellow-700">
+          <StatusBadge borderColorClass="border-yellow-700" additionalClasses="min-w-[3.6em]">
              {pitDuration}
           </StatusBadge>
         )}        
         {dnf && (
-          <StatusBadge borderColorClass="border-red-500" additionalClasses="min-w-[4.5em]">
+          <StatusBadge borderColorClass="border-red-500" additionalClasses="min-w-[3.6em]">
             DNF
           </StatusBadge>
         )}
