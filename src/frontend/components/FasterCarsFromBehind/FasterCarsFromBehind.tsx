@@ -67,25 +67,25 @@ export const FasterCarsFromBehindDisplay = ({
 
   return (
     <div
-      className={`w-full rounded-sm font-bold ${background} ${animate}`}
+      className={`w-full rounded-sm ${background} ${animate}`}
     >
       <div className={`flex p-1 ${(settings?.showName || settings?.showBadge) && settings?.showDistance ? 'justify-between' : settings?.showDistance ? 'justify-end' : 'justify-start'}`}>
         <div className="flex gap-1">
           {settings?.showName && (
-            <div className="rounded-sm bg-gray-700 p-1">{name}</div>
+            <div className="rounded-sm text-lg bg-gray-700 p-1 px-2">{name}</div>
           )}
           {settings?.showBadge && (
             <div className="flex align-center">
               <DriverRatingBadge
                 license={license}
                 rating={rating}
-                format={settings.badgeFormat as 'license-color-fullrating-white' | 'fullrating-white-no-license' | 'license-color-fullrating-bw' | 'license-color-rating-bw' | 'license-color-rating-bw-no-license' | 'rating-color-no-license' | 'license-bw-rating-bw' | 'rating-only-bw-rating-bw' | 'license-bw-rating-bw-no-license' | 'rating-bw-no-license' | 'fullrating-bw-no-license' | 'rating-only-color-rating-bw'}
+                format={settings.badgeFormat as 'license-color-fullrating-combo' | 'fullrating-color-no-license' | 'license-color-fullrating-bw' | 'license-color-rating-bw' | 'license-color-rating-bw-no-license' | 'rating-color-no-license' | 'license-bw-rating-bw' | 'rating-only-bw-rating-bw' | 'license-bw-rating-bw-no-license' | 'rating-bw-no-license' | 'fullrating-bw-no-license' | 'rating-only-color-rating-bw'}
               />
             </div>
           )}
         </div>
         {settings?.showDistance && (
-          <div className="rounded-sm bg-gray-700 p-1">{distance?.toFixed(1)}</div>
+          <div className="rounded-sm text-lg bg-gray-700 p-1 px-2">{distance?.toFixed(1)}</div>
         )}
       </div>
 
