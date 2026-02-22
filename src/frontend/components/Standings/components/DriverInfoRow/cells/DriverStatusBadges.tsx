@@ -119,7 +119,7 @@ export const DriverStatusBadges = memo(
              L {pitLap}
           </StatusBadge>
         )}
-        {lastPit && pitStopDuration && (
+        {lastPit && pitDuration && (
           <StatusBadge borderColorClass="border-yellow-700" additionalClasses="min-w-[3.6em]">
              {pitDuration}
           </StatusBadge>
