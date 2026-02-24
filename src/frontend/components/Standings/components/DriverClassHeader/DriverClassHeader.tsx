@@ -34,12 +34,12 @@ export const DriverClassHeader = ({
       <td colSpan={colSpan ?? 4} className="p-0">
         <div className={`[text-shadow:_1px_1px_1px_rgba(0_0_0/0.2)] flex`}>
           <span
-            className={`${getTailwindStyle(classColor, highlightColor, isMultiClass).classHeader} px-2 py-1 font-bold border-l-4`}
+            className={`${getTailwindStyle(classColor, highlightColor, isMultiClass).classHeader} px-2 font-bold`}
           >
             {className}
           </span>
           <span
-            className={`${getTailwindStyle(classColor, highlightColor, isMultiClass).driverIcon} px-2 py-1 flex items-center gap-1`}
+            className={`${getTailwindStyle(classColor, highlightColor, isMultiClass).driverIcon} px-2 flex items-center gap-1`}
           >
             {sof ? (
               <>
