@@ -7,7 +7,7 @@ export interface DriverNameParts {
 export const extractDriverName = (
   fullName = ''
 ): DriverNameParts => {
-  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  const parts = fullName.trim().split(/\s+/).filter(Boolean).map(part => part.replace(/\d/g, ''));
 
   if (parts.length === 0) {
     return { firstName: '', middleName: null, surname: '' };
