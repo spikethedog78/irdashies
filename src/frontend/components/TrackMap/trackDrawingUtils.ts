@@ -173,7 +173,7 @@ export const drawDrivers = (
           displayText =
             livePosition && livePosition > 0
               ? livePosition.toString()
-              : '';
+              : (sessionPosition ? sessionPosition.toString() : '');
         } else if (displayMode === 'sessionPosition') {
            displayText =
             sessionPosition && sessionPosition > 0
