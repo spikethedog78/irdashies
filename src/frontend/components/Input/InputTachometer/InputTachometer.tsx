@@ -253,7 +253,7 @@ export const Tachometer = ({
 
   return (
     <>
-      <div className="flex items-center gap-1 p-2 rounded">
+      <div className="flex flex-col items-center gap-2 p-2 rounded">
         {/* LED lights */}
         <div className="flex gap-1">
           {Array.from({ length: effectiveNumLights }, (_, i) => (
@@ -274,11 +274,11 @@ export const Tachometer = ({
         {/* RPM display - shows when showRpmText is true OR when custom shift points exist */}
         {shouldShowRpmBox && (
           <div 
-            className="ml-3 text-sm font-mono font-bold text-white bg-black/50 px-2 rounded transition-all duration-200 whitespace-nowrap flex items-center"
+            className="text-md font-mono font-bold text-white transition-all duration-200 whitespace-nowrap flex items-center justify-center text-center"
             style={{
               ...getRpmBoxStyle(),
               minWidth: showRpmText ? '120px' : '60px', // Reserve space to prevent layout shift
-              height: '32px', // Fixed height to prevent vertical shift
+              height: '26px', // Fixed height to prevent vertical shift
             }}
           >
             {showRpmText && (

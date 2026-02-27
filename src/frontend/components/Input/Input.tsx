@@ -21,12 +21,12 @@ export const Input = () => {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex flex-col">
       {/* Tachometer at the top when enabled */}
       {tachometerSettings.enabled && (
         <div className="flex justify-center mb-2 shrink-0">
           <div
-            className="bg-slate-800/(--bg-opacity)"
+            className="bg-slate-800/(--bg-opacity) rounded-lg"
             style={{
               ['--bg-opacity' as string]: `${settings?.background?.opacity ?? 80}%`,
             }}
