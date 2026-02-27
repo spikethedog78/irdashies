@@ -296,7 +296,6 @@ const PitlaneHelperDisplay = ({
         ['--bg-opacity' as string]: `${config.background.opacity ?? 0}%`,
       }}
     >
-
       {/* Row 1: Speed delta + speed bar */}
       <div className="flex items-end gap-2 w-full">
         <div
@@ -333,95 +332,89 @@ const PitlaneHelperDisplay = ({
             {displayKph ? speed.limitKph.toFixed(0) : speed.limitMph.toFixed(0)}
           </div>
         </div>
-
       </div>
 
       {/* Row 2: Countdown bars (entry/box/exit) */}
       {((!onPitRoad &&
-  position.distanceToPitEntry > 0 &&
-  position.distanceToPitEntry <= config.approachDistance) ||
-  (onPitRoad && Math.abs(position.distanceToPit) >= 5) ||
-  (onPitRoad &&
-    position.distanceToPit < -5 &&
-    position.distanceToPitExit > 0 &&
-    position.distanceToPitExit <= 150)) && (
-
-  <div className="flex flex-col gap-3 w-full">
-
-    {/* Row 1: Countdown bars */}
-    <div
-      className={`flex gap-3 w-full ${
-        config.progressBarOrientation === 'vertical'
-          ? 'flex-row'
-          : 'flex-col'
-      }`}
-    >
-      {!onPitRoad &&
         position.distanceToPitEntry > 0 &&
-        position.distanceToPitEntry <= config.approachDistance && (
-          <PitCountdownBar
-            distance={position.distanceToPitEntry}
-            maxDistance={config.approachDistance}
-            orientation={config.progressBarOrientation}
-            color={getCountdownColor(
-              position.distanceToPitEntry,
-              config.approachDistance
+        position.distanceToPitEntry <= config.approachDistance) ||
+        (onPitRoad && Math.abs(position.distanceToPit) >= 5) ||
+        (onPitRoad &&
+          position.distanceToPit < -5 &&
+          position.distanceToPitExit > 0 &&
+          position.distanceToPitExit <= 150)) && (
+        <div className="flex flex-col gap-3 w-full">
+          {/* Row 1: Countdown bars */}
+          <div
+            className={`flex gap-3 w-full ${
+              config.progressBarOrientation === 'vertical'
+                ? 'flex-row'
+                : 'flex-col'
+            }`}
+          >
+            {!onPitRoad &&
+              position.distanceToPitEntry > 0 &&
+              position.distanceToPitEntry <= config.approachDistance && (
+                <PitCountdownBar
+                  distance={position.distanceToPitEntry}
+                  maxDistance={config.approachDistance}
+                  orientation={config.progressBarOrientation}
+                  color={getCountdownColor(
+                    position.distanceToPitEntry,
+                    config.approachDistance
+                  )}
+                  targetName="Pit Entry"
+                />
+              )}
+
+            {onPitRoad && Math.abs(position.distanceToPit) >= 5 && (
+              <PitCountdownBar
+                distance={Math.abs(position.distanceToPit)}
+                maxDistance={100}
+                orientation={config.progressBarOrientation}
+                color={
+                  position.distanceToPit > 0
+                    ? getCountdownColor(position.distanceToPit, 100)
+                    : 'rgb(34, 197, 94)'
+                }
+                targetName={position.distanceToPit > 0 ? 'Pitbox' : 'Past Box'}
+              />
             )}
-            targetName="Pit Entry"
-          />
-        )}
 
-      {onPitRoad && Math.abs(position.distanceToPit) >= 5 && (
-        <PitCountdownBar
-          distance={Math.abs(position.distanceToPit)}
-          maxDistance={100}
-          orientation={config.progressBarOrientation}
-          color={
-            position.distanceToPit > 0
-              ? getCountdownColor(position.distanceToPit, 100)
-              : 'rgb(34, 197, 94)'
-          }
-          targetName={
-            position.distanceToPit > 0 ? 'Pitbox' : 'Past Box'
-          }
-        />
+            {onPitRoad &&
+              position.distanceToPit < -5 &&
+              position.distanceToPitExit > 0 &&
+              position.distanceToPitExit <= 150 && (
+                <PitCountdownBar
+                  distance={position.distanceToPitExit}
+                  maxDistance={150}
+                  orientation={config.progressBarOrientation}
+                  color={getCountdownColor(position.distanceToPitExit, 150)}
+                  targetName="Pit Exit"
+                />
+              )}
+          </div>
+
+          {/* Row 2: Speed + Inputs */}
+          {(config.showSpeedBar || shouldShowInputs) && (
+            <div className="flex gap-3 w-full">
+              {config.showSpeedBar && (
+                <PitSpeedBar
+                  speedKph={speed.speedKph}
+                  limitKph={speed.limitKph}
+                />
+              )}
+
+              {shouldShowInputs && (
+                <PitExitInputs
+                  showThrottle={config.pitExitInputs.throttle}
+                  showClutch={config.pitExitInputs.clutch}
+                />
+              )}
+            </div>
+          )}
+        </div>
       )}
-
-      {onPitRoad &&
-        position.distanceToPit < -5 &&
-        position.distanceToPitExit > 0 &&
-        position.distanceToPitExit <= 150 && (
-          <PitCountdownBar
-            distance={position.distanceToPitExit}
-            maxDistance={150}
-            orientation={config.progressBarOrientation}
-            color={getCountdownColor(position.distanceToPitExit, 150)}
-            targetName="Pit Exit"
-          />
-        )}
-    </div>
-
-    {/* Row 2: Speed + Inputs */}
-    {(config.showSpeedBar || shouldShowInputs) && (
-      <div className="flex gap-3 w-full">
-        {config.showSpeedBar && (
-            <PitSpeedBar
-              speedKph={speed.speedKph}
-              limitKph={speed.limitKph}
-            />     
-        )}
-
-        {shouldShowInputs && (        
-            <PitExitInputs
-              showThrottle={config.pitExitInputs.throttle}
-              showClutch={config.pitExitInputs.clutch}
-            />    
-        )}
-      </div>
-    )}
-
-  </div>
-)}
 
       {/* Status & warning badges */}
       {onPitRoad && Math.abs(position.distanceToPit) < 5 && (
