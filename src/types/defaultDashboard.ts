@@ -826,6 +826,30 @@ export const defaultDashboard: {
       },
     },
     {
+      id: 'laptimelog',
+      enabled: false,
+      layout: {
+        x: 378,
+        y: 102,
+        width: 800,
+        height: 500,
+      },
+      config: {
+        testOptionA: true,
+        testOptionB: true,
+        background: {
+          opacity: 80,
+        },
+        sessionVisibility: {
+          race: true,
+          loneQualify: false,
+          openQualify: true,
+          practice: true,
+          offlineTesting: true,
+        },
+      },
+    },
+    {
       id: 'telemetryinspector',
       enabled: false,
       layout: {

@@ -79,6 +79,14 @@ export const SettingsMenu = () => {
         </li>
         <li>
           <Link
+            to="/settings/laptimelog"
+            className={menuItemClass('/laptimelog')}
+          >
+            Lap Time Log
+          </Link>
+        </li>
+        <li>
+          <Link
             to="/settings/pitlanehelper"
             className={menuItemClass('/pitlanehelper')}
           >
