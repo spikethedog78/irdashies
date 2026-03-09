@@ -829,10 +829,10 @@ export const defaultDashboard: {
       id: 'laptimelog',
       enabled: false,
       layout: {
-        x: 378,
-        y: 102,
-        width: 800,
-        height: 500,
+        x: 300,
+        y: 100,
+        width: 250,
+        height: 250,
       },
       config: {
         testOptionA: true,

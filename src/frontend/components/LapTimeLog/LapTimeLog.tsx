@@ -75,7 +75,7 @@ export const LapTimeLog = () => {
   return (
     <LapTimeLogDisplay 
       settings={settings} 
-      status={'Test'} 
+      status={'Live'} 
       current={currentLapTime} 
       lastlap={lastLapTime} 
       bestlap={bestLapTime} 
@@ -95,7 +95,7 @@ export const LapTimeLogDisplay = ({
   history,
 }: {
   settings: LapTimeLogWidgetSettings;
-  status?: 'Test' | 'Demo';
+  status?: 'Live' | 'Demo';
   current?: number;
   lastlap?: number;
   bestlap?: number;
@@ -118,16 +118,16 @@ export const LapTimeLogDisplay = ({
   
   return (
     <div
-      className="w-full text-md flex flex-col items-center bg-slate-800/[var(--bg-opacity)] rounded-md px-2 py-2 text-white"
+      className="w-full text-sm flex flex-col items-center bg-slate-800/[var(--bg-opacity)] rounded-md px-2 py-2 text-white"
       style={{ '--bg-opacity': `${settings.config.background.opacity}%` } as React.CSSProperties}
     >
       {/* Current Lap Timer (The Big One) */}
-      <div className="text-[2em] w-full p-1 mb-2 bg-pink-500 flex relative items-center justify-center rounded-sm">
+      <div className="text-[1.8em] w-full p-1 mb-2 bg-slate-800 flex relative items-center justify-center rounded-sm">
         <div className="absolute left-2">
           <TimerIcon weight="bold" />
         </div>
         <div className="w-full text-center tabular-nums">
-          {formatTime(current)}
+          {formatTime(current !== undefined && current > 5 ? current : lastlap)}
         </div>
       </div>
 
@@ -151,6 +151,7 @@ export const LapTimeLogDisplay = ({
       {/* Debug/Status info */}
       <div className="mt-2 text-xs uppercase opacity-40 w-full flex justify-between">
         <span>{status} Mode</span>
+        <span>{formatTime(overall)}</span>
         <span>A: {settings.config.testOptionA ? 'ON' : 'OFF'} | B: {settings.config.testOptionB ? 'ON' : 'OFF'}</span>
       </div>
     </div>
