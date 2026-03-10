@@ -122,12 +122,25 @@ export const NewSessionBest: Story = {
   },
 };
 
-export const Minimal: Story = {
-  name: 'Minimal View (Current Lap Only)',
+export const CurrentLapOnly: Story = {
+  name: 'Minimal',
   args: {
     ...baseArgs,
     settings: mockSettings({
       showPredictedLap: false,
+      showLastLap: false,
+      showBestLap: false,
+      history: { enabled: false, count: 5 },
+    }),
+  },
+};
+
+export const CompactAndPredicted: Story = {
+  name: 'Current and Predicted',
+  args: {
+    ...baseArgs,
+    settings: mockSettings({
+      delta: { enabled: true, method: 'lastlap' },
       showLastLap: false,
       showBestLap: false,
       history: { enabled: false, count: 5 },
@@ -163,16 +176,6 @@ export const NoDelta: Story = {
     ...baseArgs,
     settings: mockSettings({
       delta: { enabled: false, method: 'bestlap' },
-    }),
-  },
-};
-
-export const DeltaToLastLap: Story = {
-  name: 'Delta vs Last Lap',
-  args: {
-    ...baseArgs,
-    settings: mockSettings({
-      delta: { enabled: true, method: 'lastlap' },
     }),
   },
 };
