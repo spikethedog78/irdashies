@@ -54,7 +54,14 @@ export const LapTimeLogSettings = () => {
       {(handleConfigChange) => (
         <div className="space-y-4">
           {/* Tabs */}
-          <div className="flex border-b border-slate-700/50">
+          <div className="flex border-b border-slate-700/50">            
+            <TabButton
+              id="display"
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            >
+              Display
+            </TabButton>
             <TabButton
               id="options"
               activeTab={activeTab}
@@ -73,45 +80,10 @@ export const LapTimeLogSettings = () => {
 
           <div className="pt-4">
             {/* DISPLAY TAB */}
-            {activeTab === 'options' && (
+            {activeTab === 'display' && (
               <>
               <SettingsSection title="Display">
              
-                {/* Background Opacity */}
-                <SettingSliderRow
-                  title="Background Opacity"
-                  value={settings.config.background?.opacity ?? 30}
-                  units="%"
-                  min={0}
-                  max={100}
-                  step={5}
-                  onChange={(v) =>
-                    handleConfigChange({
-                      background: { opacity: v },
-                    })
-                  }
-                /> 
-
-                {/* Scale */}
-                <SettingSliderRow
-                  title="Scale"
-                  description="Adjust the size of the font by adjusting this widget's scale"
-                  value={settings.config.scale ?? 1}
-                  units="%"
-                  min={50}
-                  max={150}
-                  step={1}
-                  onChange={(v) =>
-                    handleConfigChange({
-                      scale: v,
-                    })
-                  }
-                />  
-
-              </SettingsSection>
-
-              <SettingsSection title="Laps">           
-
                 <SettingToggleRow
                   title="Show Current Lap"
                   description="Work in progress"
@@ -227,6 +199,44 @@ export const LapTimeLogSettings = () => {
                            
               </SettingsSection>
               </>
+            )}
+
+            {/* OPTIONS TAB */}
+            {activeTab === 'options' && (
+              <SettingsSection title="Options">
+             
+                {/* Background Opacity */}
+                <SettingSliderRow
+                  title="Background Opacity"
+                  value={settings.config.background?.opacity ?? 30}
+                  units="%"
+                  min={0}
+                  max={100}
+                  step={5}
+                  onChange={(v) =>
+                    handleConfigChange({
+                      background: { opacity: v },
+                    })
+                  }
+                /> 
+
+                {/* Scale */}
+                <SettingSliderRow
+                  title="Scale"
+                  description="Adjust the size of the font by adjusting this widget's scale"
+                  value={settings.config.scale ?? 1}
+                  units="%"
+                  min={50}
+                  max={150}
+                  step={1}
+                  onChange={(v) =>
+                    handleConfigChange({
+                      scale: v,
+                    })
+                  }
+                />  
+
+              </SettingsSection>
             )}
 
             {/* VISIBILITY TAB */}

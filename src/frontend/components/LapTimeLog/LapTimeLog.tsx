@@ -172,29 +172,28 @@ export const LapTimeLogDisplay = ({
     delta > 0;
 
   // for the flash
-  let bgColor = "bg-slate-800";
+  let bgColor = "bg-slate-900/70";
   if (current !== undefined && current <= 5) {
     const isSessionBest = lastlap !== undefined && lastlap > 0 && overall !== undefined && overall > 0 && Math.abs(lastlap - overall) < 0.001;
     const isPersonalBest = lastlap !== undefined && lastlap > 0 && bestlap !== undefined && bestlap > 0 && Math.abs(lastlap - bestlap) < 0.001;
-    bgColor = "bg-yellow-800";
-    if (isPersonalBest) bgColor = "bg-green-800";
+    bgColor = "bg-slate-600";
+    if (isPersonalBest) bgColor = "bg-green-700";
     if (isSessionBest) bgColor = "bg-purple-800";
   }
   
   return (
     <div
-      className="w-full text-sm bg-slate-800/[var(--bg-opacity)] rounded-md p-2 text-white"
+      className="w-full text-sm bg-slate-800/[var(--bg-opacity)] rounded-md p-1 text-white"
       style={{ '--bg-opacity': `${settings.config.background.opacity}%` } as React.CSSProperties}
     >
-      <div className="w-full flex flex-col gap-1"
+      <div className="w-full flex flex-col gap-0.5"
       style={{ 'font-size': `${settings.config.scale}%` } as React.CSSProperties}>
 
         {/* Current Lap Timer (The Big One) */}
         {settings.config.showCurrentLap && (
         <div 
           id="current-lap"
-          className={`text-[1.8em] w-full p-1 ${bgColor}/[var(--bg-opacity)] flex relative items-center justify-center rounded-sm transition-colors duration-500`}
-          style={{ '--bg-opacity': `${settings.config.background.opacity}%` } as React.CSSProperties}
+          className={`text-[1.8em] w-full p-1 ${bgColor} flex relative items-center justify-center rounded-sm transition-colors duration-500`}         
         >
           <div className="absolute left-2">
             <TimerIcon weight="bold" />
@@ -207,11 +206,9 @@ export const LapTimeLogDisplay = ({
 
         {/* Predicted (With Delta) */}
         {settings.config.showPredictedLap && (
-        <div className="text-[1.3em] w-full p-1 bg-slate-800/[var(--bg-opacity)] flex relative items-center justify-center rounded-sm"
-        style={{ '--bg-opacity': `${settings.config.background.opacity}%` } as React.CSSProperties}
-        >
-          <div className="absolute left-2">
-            <TargetIcon weight="bold" />
+        <div className="text-[1.3em] w-full p-1 bg-slate-900/60 flex relative items-center justify-center rounded-sm">
+          <div className="absolute left-3">
+            <TargetIcon weight="regular" />
           </div>
           <div className="w-full text-center tabular-nums">
             {formatTime(current !== undefined && current > 5 ? predicted : deltalap)}

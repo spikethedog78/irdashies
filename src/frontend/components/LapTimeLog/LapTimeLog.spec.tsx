@@ -172,7 +172,7 @@ describe('LapTimeLogDisplay', () => {
       <LapTimeLogDisplay {...defaultProps} current={4.9} lastlap={91.5} bestlap={91.5} />
     );
     const mainTimerWrapper = container.querySelector('#current-lap');
-    expect(mainTimerWrapper).toHaveClass('bg-green-800/[var(--bg-opacity)]');
+    expect(mainTimerWrapper).toHaveClass('bg-green-700');
   });
 
   it('flashes purple for a new session best lap', () => {
@@ -180,7 +180,7 @@ describe('LapTimeLogDisplay', () => {
       <LapTimeLogDisplay {...defaultProps} current={4.9} lastlap={91.0} bestlap={91.2} overall={91.0} />
     );
     const mainTimerWrapper = container.querySelector('#current-lap');
-    expect(mainTimerWrapper).toHaveClass('bg-purple-800/[var(--bg-opacity)]');
+    expect(mainTimerWrapper).toHaveClass('bg-purple-800');
   });
 
   it('limits history to count from settings', () => {

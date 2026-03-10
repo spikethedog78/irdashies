@@ -49,7 +49,7 @@ export const LapTimeRow = ({ label, time, delta, best, overall, settings }: LapT
     delta > 0;
 
   return (
-    <div className="flex w-full text-[1em] justify-between items-center p-1 border-b border-slate-600 last:border-0">
+    <div className="flex w-full text-[1em] py-0.5 px-2 odd:bg-slate-800/40 even:bg-slate-900/40">
       <span className="flex-1 text-white tabular-nums uppercase">
         {label}
       </span>
