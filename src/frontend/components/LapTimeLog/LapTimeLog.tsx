@@ -183,16 +183,17 @@ export const LapTimeLogDisplay = ({
   
   return (
     <div
-      className="w-full text-sm flex flex-col items-center bg-slate-800/[var(--bg-opacity)] rounded-md px-2 py-2 text-white"
+      className="w-full text-sm bg-slate-800/[var(--bg-opacity)] rounded-md p-2 text-white"
       style={{ '--bg-opacity': `${settings.config.background.opacity}%` } as React.CSSProperties}
     >
-      <div className="w-full"
+      <div className="w-full flex flex-col gap-1"
       style={{ 'font-size': `${settings.config.scale}%` } as React.CSSProperties}>
 
         {/* Current Lap Timer (The Big One) */}
         {settings.config.showCurrentLap && (
         <div 
-          className={`text-[1.8em] w-full p-1 mb-2 ${bgColor}/[var(--bg-opacity)] flex relative items-center justify-center rounded-sm transition-colors duration-500`}
+          id="current-lap"
+          className={`text-[1.8em] w-full p-1 ${bgColor}/[var(--bg-opacity)] flex relative items-center justify-center rounded-sm transition-colors duration-500`}
           style={{ '--bg-opacity': `${settings.config.background.opacity}%` } as React.CSSProperties}
         >
           <div className="absolute left-2">
@@ -206,7 +207,7 @@ export const LapTimeLogDisplay = ({
 
         {/* Predicted (With Delta) */}
         {settings.config.showPredictedLap && (
-        <div className="text-[1.3em] w-full p-1 mb-2 bg-slate-800/[var(--bg-opacity)] flex relative items-center justify-center rounded-sm"
+        <div className="text-[1.3em] w-full p-1 bg-slate-800/[var(--bg-opacity)] flex relative items-center justify-center rounded-sm"
         style={{ '--bg-opacity': `${settings.config.background.opacity}%` } as React.CSSProperties}
         >
           <div className="absolute left-2">
@@ -237,7 +238,7 @@ export const LapTimeLogDisplay = ({
         
         {/* History List */}
         {settings.config.history?.enabled && (
-        <div className="w-full mt-1">
+        <>
           {sortedHistory.map((entry) => (
             <LapTimeRow
               key={entry.lap} // Critical for React performance
@@ -249,7 +250,7 @@ export const LapTimeLogDisplay = ({
               settings={settings}
             />
           ))}
-        </div>
+        </>
         )}
 
       </div>

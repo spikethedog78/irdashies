@@ -74,7 +74,8 @@ export const LapTimeLogSettings = () => {
           <div className="pt-4">
             {/* DISPLAY TAB */}
             {activeTab === 'options' && (
-              <SettingsSection title="Options">
+              <>
+              <SettingsSection title="Display">
              
                 {/* Background Opacity */}
                 <SettingSliderRow
@@ -105,7 +106,11 @@ export const LapTimeLogSettings = () => {
                       scale: v,
                     })
                   }
-                />             
+                />  
+
+              </SettingsSection>
+
+              <SettingsSection title="Laps">           
 
                 <SettingToggleRow
                   title="Show Current Lap"
@@ -141,44 +146,7 @@ export const LapTimeLogSettings = () => {
                   onToggle={(newValue) =>
                     handleConfigChange({ showBestLap: newValue })
                   }
-                />      
-
-                <SettingToggleRow
-                  title="Show Lap History"
-                  description="Work in progress"
-                  enabled={settings.config.history?.enabled ?? true}
-                  onToggle={(v) =>
-                    handleConfigChange({                     
-                      ...settings.config,                      
-                      history: {                         
-                        ...settings.config.history, 
-                        enabled: v 
-                      },
-                    })
-                  }
-                />     
-
-                {settings.config.history?.enabled && (
-                  <SettingsSection>
-                    <SettingSelectRow
-                      title="Number Of Laps To Show"
-                      value={(settings.config.history?.count ?? 10).toString()}
-                      options={Array.from({ length: 10 }, (_, i) => {
-                        const num = i + 1;
-                        return { label: num.toString(), value: num.toString() };
-                      })}
-                      onChange={(v) =>
-                        handleConfigChange({                     
-                        ...settings.config,                      
-                        history: {                         
-                          ...settings.config.history, 
-                          count: parseInt(v) 
-                        },
-                      })
-                      }
-                    />   
-                  </SettingsSection>
-                )}
+                />   
 
                 <SettingToggleRow
                   title="Display Lap Delta"
@@ -218,9 +186,47 @@ export const LapTimeLogSettings = () => {
                       }
                     />
                 </SettingsSection>
-                )}
+                )}  
+
+                <SettingToggleRow
+                  title="Show Lap History"
+                  description="Work in progress"
+                  enabled={settings.config.history?.enabled ?? true}
+                  onToggle={(v) =>
+                    handleConfigChange({                     
+                      ...settings.config,                      
+                      history: {                         
+                        ...settings.config.history, 
+                        enabled: v 
+                      },
+                    })
+                  }
+                />     
+
+                {settings.config.history?.enabled && (
+                  <SettingsSection>
+                    <SettingSelectRow
+                      title="Number Of Laps To Show"
+                      value={(settings.config.history?.count ?? 10).toString()}
+                      options={Array.from({ length: 10 }, (_, i) => {
+                        const num = i + 1;
+                        return { label: num.toString(), value: num.toString() };
+                      })}
+                      onChange={(v) =>
+                        handleConfigChange({                     
+                        ...settings.config,                      
+                        history: {                         
+                          ...settings.config.history, 
+                          count: parseInt(v) 
+                        },
+                      })
+                      }
+                    />   
+                  </SettingsSection>
+                )}    
                            
               </SettingsSection>
+              </>
             )}
 
             {/* VISIBILITY TAB */}
