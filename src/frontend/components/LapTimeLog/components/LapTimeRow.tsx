@@ -12,12 +12,12 @@ interface LapTimeRowProps {
 export const formatTime = (t: number | undefined) => {
   if (!t || t <= 0) return "00:00.000";
   const mins = Math.floor(t / 60);
-  const secs = (t % 60).toFixed(3).padStart(6, '0');
+  const secs = (Math.floor((t % 60) * 1000) / 1000).toFixed(3).padStart(6, '0');
   return `${mins.toString().padStart(2, '0')}:${secs}`;
 };
 
 export const formatDelta = (delta: number | undefined) => {
-  if (delta === undefined || delta === 0) return "---";
+  if (delta === undefined || delta === 0) return "";
   const formatter = new Intl.NumberFormat('en-US', {
     signDisplay: 'always',
     minimumFractionDigits: 3,

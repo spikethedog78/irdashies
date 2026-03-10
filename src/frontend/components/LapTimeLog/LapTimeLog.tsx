@@ -52,6 +52,7 @@ export const LapTimeLog = () => {
   }, [carIdxBestLapTime]);
 
   // calculate predicted
+  const prevDeltaLap = deltaLap;
   let deltaLap;
   if (settings.config.delta?.method == 'lastlap') {
     deltaLap = lastLapTime;
@@ -87,7 +88,7 @@ export const LapTimeLog = () => {
       const newEntry: LapEntry = {
         lap: lapCompleted,
         time: lastLapTime,
-        delta: bestLapTime > 0 ? lastLapTime - bestLapTime : 0,
+        delta: deltaLap !== undefined && deltaLap > 0 ? lastLapTime - deltaLap : 0,
       };
       lastLoggedLap.current = lapCompleted;
       lastLoggedTime.current = lastLapTime;
@@ -95,7 +96,7 @@ export const LapTimeLog = () => {
     });
     prevSessionNum.current = sessionNum;
     prevSessionTime.current = sessionTime;
-  }, [sessionNum, sessionTime, lapCompleted, lastLapTime, bestLapTime]);
+  }, [sessionNum, sessionTime, lapCompleted, lastLapTime, deltaLap]);
 
   // demo mode
   if (isDemoMode) {
@@ -176,7 +177,7 @@ export const LapTimeLogDisplay = ({
   if (current !== undefined && current <= 5) {
     const isSessionBest = lastlap !== undefined && lastlap > 0 && overall !== undefined && overall > 0 && Math.abs(lastlap - overall) < 0.001;
     const isPersonalBest = lastlap !== undefined && lastlap > 0 && bestlap !== undefined && bestlap > 0 && Math.abs(lastlap - bestlap) < 0.001;
-    bgColor = "bg-slate-600";
+    bgColor = "bg-slate-700";
     if (isPersonalBest) bgColor = "bg-green-700";
     if (isSessionBest) bgColor = "bg-purple-800";
   }
@@ -211,7 +212,7 @@ export const LapTimeLogDisplay = ({
             <TargetIcon weight="regular" />
           </div>
           <div className="w-full text-center tabular-nums">
-            {formatTime(current !== undefined && current > 5 ? predicted : deltalap)}
+            {formatTime(current !== undefined && current > 5 ? predicted : lastlap)}
           </div>
           {settings.config.delta?.enabled && (
           <div className={`absolute right-2 text-center tabular-nums ${
