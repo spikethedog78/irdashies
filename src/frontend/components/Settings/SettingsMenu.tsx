@@ -82,7 +82,7 @@ export const SettingsMenu = () => {
             to="/settings/laptimelog"
             className={menuItemClass('/laptimelog')}
           >
-            Lap Time Log
+            Lap Timer
           </Link>
         </li>
         <li>

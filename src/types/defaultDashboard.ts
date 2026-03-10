@@ -835,8 +835,19 @@ export const defaultDashboard: {
         height: 250,
       },
       config: {
-        testOptionA: true,
-        testOptionB: true,
+        scale: 100,
+        showCurrentLap: true,
+        showPredictedLap: true,
+        showLastLap: true,
+        showBestLap: true,
+        delta: {
+          enabled: true,
+          method: 'bestlap',
+        },
+        history: {
+          enabled: true,
+          count: 10,
+        },
         background: {
           opacity: 80,
         },

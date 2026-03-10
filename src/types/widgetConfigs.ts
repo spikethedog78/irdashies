@@ -432,8 +432,19 @@ export interface TwitchChatConfig {
 }
 
 export interface LapTimeLogConfig {
-  testOptionB: boolean;
-  testOptionA: boolean;
+  showCurrentLap: boolean,
+  showPredictedLap: boolean,
+  showLastLap: boolean,
+  showBestLap: boolean,
+  delta: {
+    enabled: boolean,
+    method: 'lastlap' | 'bestlap' | 'overall',
+  },
+  history: {
+    enabled: boolean,
+    count: number,
+  },
+  scale: number;
   background: { opacity: number };
   sessionVisibility: SessionVisibilitySettings;
 }

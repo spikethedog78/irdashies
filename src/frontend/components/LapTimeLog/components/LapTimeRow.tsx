@@ -1,19 +1,33 @@
+import type { LapTimeLogWidgetSettings } from '@irdashies/types';
+
 interface LapTimeRowProps {
   label: string;
   time: number | undefined; 
-  best: number | undefined;
-  overall: number | undefined;
+  delta?: number | undefined; 
+  best?: number | undefined;
+  overall?: number | undefined;
+  settings?: LapTimeLogWidgetSettings
 }
 
-export const LapTimeRow = ({ label, time, best, overall }: LapTimeRowProps) => {
-  
-  const formatTime = (t: number | undefined) => {
-    if (!t || t <= 0) return "00:00.000";
-    const mins = Math.floor(t / 60);
-    const secs = (t % 60).toFixed(3).padStart(6, '0');
-    return `${mins.toString().padStart(2, '0')}:${secs}`;
-  };
+export const formatTime = (t: number | undefined) => {
+  if (!t || t <= 0) return "00:00.000";
+  const mins = Math.floor(t / 60);
+  const secs = (t % 60).toFixed(3).padStart(6, '0');
+  return `${mins.toString().padStart(2, '0')}:${secs}`;
+};
 
+export const formatDelta = (delta: number | undefined) => {
+  if (delta === undefined || delta === 0) return "---";
+  const formatter = new Intl.NumberFormat('en-US', {
+    signDisplay: 'always',
+    minimumFractionDigits: 3,
+    maximumFractionDigits: 3,
+  });    
+  return formatter.format(delta);
+};
+
+export const LapTimeRow = ({ label, time, delta, best, overall, settings }: LapTimeRowProps) => {
+  
   const isGreen = 
     time !== undefined && 
     best !== undefined && 
@@ -26,12 +40,29 @@ export const LapTimeRow = ({ label, time, best, overall }: LapTimeRowProps) => {
     time > 0 && 
     time <= overall;
 
+  const deltaIsGreen = 
+    delta !== undefined &&    
+    delta < 0;
+
+  const deltaIsRed = 
+    delta !== undefined &&    
+    delta > 0;
+
   return (
-    <div className="flex w-full text-md justify-between items-center p-1 border-b border-slate-600 last:border-0">
-      <span className="text-white tabular-nums uppercase">
+    <div className="flex w-full text-[1em] justify-between items-center p-1 border-b border-slate-600 last:border-0">
+      <span className="flex-1 text-white tabular-nums uppercase">
         {label}
       </span>
-      <span className={`tabular-nums ${
+      {settings?.config.delta?.enabled && (
+      <span className={`flex-1 text-center tabular-nums ${
+          deltaIsGreen 
+            ? 'text-green-400' 
+            : (deltaIsRed ? 'text-red-400' : 'text-zinc-500')
+        }`}>
+        {formatDelta(delta)}
+      </span>
+      )}
+      <span className={`flex-1 text-right tabular-nums ${
           isPurple 
             ? 'text-purple-400' 
             : (isGreen ? 'text-green-400' : 'text-zinc-100')

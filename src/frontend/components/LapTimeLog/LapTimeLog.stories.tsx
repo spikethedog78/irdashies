@@ -15,8 +15,19 @@ const mockConfig = (
   overrides: Partial<LapTimeLogConfig> = {}
 ): LapTimeLogConfig => ({
   background: { opacity: 80 },
-  testOptionA: true,
-  testOptionB: true,
+  scale: 1,
+  showCurrentLap: true,
+  showPredictedLap: true,
+  showLastLap: true,
+  showBestLap: true,
+  delta: {
+    enabled: true,
+    method: 'bestlap',
+  },
+  history: {
+    enabled: true,
+    count: 10,
+  },
   sessionVisibility: {
     race: true,
     loneQualify: true,
@@ -37,13 +48,11 @@ const mockSettings = (
 export const Test: Story = {
   args: {
     settings: mockSettings(),
-    status: 'Test',
   },
 };
 
 export const Demo: Story = {
   args: {
     settings: mockSettings(),
-    status: 'Demo',
   },
 };

@@ -4,10 +4,21 @@ import type { LapTimeLogWidgetSettings } from '@irdashies/types';
 const DEFAULT_CONFIG: LapTimeLogWidgetSettings = {
   enabled: false,
   config: {
-    testOptionA: true,
-    testOptionB: true,
+    scale: 100,
+    showCurrentLap: true,
+    showPredictedLap: true,
+    showLastLap: true,
+    showBestLap: true,
+    delta: {
+      enabled: true,
+      method: 'bestlap',
+    },
+    history: {
+      enabled: true,
+      count: 10,
+    },
     background: {
-      opacity: 30,
+      opacity: 80,
     },
     sessionVisibility: {
       race: true,
@@ -37,8 +48,13 @@ export const useLapTimeLogSettings = () => {
             saved.config.background?.opacity ??
             DEFAULT_CONFIG.config.background.opacity,
         },
-        testOptionA: saved.config?.testOptionA ?? DEFAULT_CONFIG.config.testOptionA,
-        testOptionB: saved.config?.testOptionB ?? DEFAULT_CONFIG.config.testOptionB,       
+        scale: saved.config?.scale ?? DEFAULT_CONFIG.config.scale,
+        showCurrentLap: saved.config?.showCurrentLap ?? DEFAULT_CONFIG.config.showCurrentLap,
+        showPredictedLap: saved.config?.showPredictedLap ?? DEFAULT_CONFIG.config.showPredictedLap,
+        showLastLap: saved.config?.showLastLap ?? DEFAULT_CONFIG.config.showLastLap,
+        showBestLap: saved.config?.showBestLap ?? DEFAULT_CONFIG.config.showBestLap,
+        delta: saved.config?.delta ?? DEFAULT_CONFIG.config.delta,   
+        history: saved.config?.history ?? DEFAULT_CONFIG.config.history,   
         sessionVisibility: saved.config?.sessionVisibility ?? DEFAULT_CONFIG.config.sessionVisibility,
       },
     } as LapTimeLogWidgetSettings;
