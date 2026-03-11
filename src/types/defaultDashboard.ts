@@ -851,6 +851,9 @@ export const defaultDashboard: {
         background: {
           opacity: 80,
         },
+        foreground: {
+          opacity: 70,
+        },
         sessionVisibility: {
           race: true,
           loneQualify: false,

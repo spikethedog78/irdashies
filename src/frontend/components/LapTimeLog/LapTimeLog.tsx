@@ -13,10 +13,11 @@ import {
 } from '@irdashies/context';
 import { useLapTimeLogSettings } from './hooks/useLapTimeLogSettings';
 import { getDemoLapTimeLogData, LapEntry } from './demoData';
-import { TimerIcon, TargetIcon } from '@phosphor-icons/react';
+import { TimerIcon, TargetIcon, XIcon } from '@phosphor-icons/react';
 import { LapTimeRow } from './components/LapTimeRow';
 import type { LapTimeLogWidgetSettings } from '@irdashies/types';
-import { formatTime, formatDelta } from './components/LapTimeRow'
+import { formatDelta } from './components/LapTimeRow'
+import { formatTime } from '@irdashies/utils/time';
 
 export const LapTimeLog = () => {
   const { isDemoMode } = useDashboard();
@@ -42,6 +43,7 @@ export const LapTimeLog = () => {
   const lastLoggedTime = useRef<number>(-1);
   const prevSessionNum = useRef<number>(sessionNum);
   const prevSessionTime = useRef<number>(sessionTime);
+  const referenceAtStartOfLap = useRef<number>(0);
 
   // calculate overall best
   const sessionBestOverall = useMemo(() => {
@@ -52,22 +54,37 @@ export const LapTimeLog = () => {
   }, [carIdxBestLapTime]);
 
   // calculate predicted
-  const prevDeltaLap = deltaLap;
-  let deltaLap;
-  if (settings.config.delta?.method == 'lastlap') {
-    deltaLap = lastLapTime;
-  } else if (settings.config.delta?.method == 'overall') {
-    deltaLap = sessionBestOverall;
-  } else {
-    deltaLap = bestLapTime;
-  }
+  const referenceTime = useMemo(() => {
+    const method = settings.config.delta?.method;
+    if (method === 'lastlap') return lastLapTime;
+    if (method === 'overall') return sessionBestOverall;
+    return bestLapTime;
+  }, [settings.config.delta?.method, lastLapTime, sessionBestOverall, bestLapTime]);
+
+  // save current delta target
+  useEffect(() => {
+    if (currentLapTime > 5 && referenceTime && referenceTime > 0) {
+      referenceAtStartOfLap.current = referenceTime;
+    }
+  }, [currentLapTime, referenceTime]);
+
+  // get current delta against chosen target
   const deltas = {
     lastlap: useTelemetryValue<number>('LapDeltaToSessionLastlLap') ?? 0,    
     bestlap: useTelemetryValue<number>('LapDeltaToBestLap') ?? 0,
     overall: useTelemetryValue<number>('LapDeltaToSessionBestLap') ?? 0,
   };
   const liveDelta = deltas[settings.config.delta?.method] ?? deltas.bestlap;
-  const predictedLap = (deltaLap !== undefined && deltaLap > 0) ? (deltaLap + liveDelta) : 0;
+  const predictedLap = (referenceTime && referenceTime > 0) ? (referenceTime + liveDelta) : 0;
+
+  // check for dirty lap
+  const deltaChecks = {
+    lastlap: useTelemetryValue<number>('LapDeltaToSessionLastlLap') ?? 0,    
+    bestlap: useTelemetryValue<number>('LapDeltaToBestLap') ?? 0,
+    overall: useTelemetryValue<number>('LapDeltaToSessionBestLap') ?? 0,
+  };
+  const isDeltaOk = deltaChecks[settings.config.delta?.method] ?? true;
+  const isDirty = currentLapTime > 5 && !isDeltaOk;
 
   // history
   useEffect(() => {
@@ -80,15 +97,19 @@ export const LapTimeLog = () => {
       if (sessionChanged || sessionRestarted) {
         lastLoggedLap.current = -1;
         lastLoggedTime.current = -1;
+        prevSessionNum.current = sessionNum;
+        prevSessionTime.current = sessionTime;
         return [];
       }
       // Log new lap
       if (!isNewLap || !isValidTime) return prev;
       if (prev.some((entry) => entry.lap === lapCompleted)) return prev;
+      const currentTarget = referenceAtStartOfLap.current;    
       const newEntry: LapEntry = {
         lap: lapCompleted,
         time: lastLapTime,
-        delta: deltaLap !== undefined && deltaLap > 0 ? lastLapTime - deltaLap : 0,
+        delta: currentTarget !== undefined && currentTarget > 0 ? lastLapTime - currentTarget : 0,
+        dirty: isDirty
       };
       lastLoggedLap.current = lapCompleted;
       lastLoggedTime.current = lastLapTime;
@@ -96,7 +117,7 @@ export const LapTimeLog = () => {
     });
     prevSessionNum.current = sessionNum;
     prevSessionTime.current = sessionTime;
-  }, [sessionNum, sessionTime, lapCompleted, lastLapTime, deltaLap]);
+  }, [sessionNum, sessionTime, lapCompleted, lastLapTime, isDirty, referenceAtStartOfLap]);
 
   // demo mode
   if (isDemoMode) {
@@ -109,6 +130,7 @@ export const LapTimeLog = () => {
         bestlap={demoData.bestlap} 
         predicted={demoData.predicted}
         overall={demoData.overall}
+        dirty={demoData.dirty}
         history={demoData.history}
       />
     );
@@ -126,6 +148,7 @@ export const LapTimeLog = () => {
       bestlap={bestLapTime} 
       predicted={predictedLap}
       overall={sessionBestOverall}
+      dirty={isDirty}
       history={history}
     />
   );
@@ -138,6 +161,7 @@ export const LapTimeLogDisplay = ({
   bestlap,
   predicted,
   overall,
+  dirty,
   history,
 }: {
   settings: LapTimeLogWidgetSettings;
@@ -146,6 +170,7 @@ export const LapTimeLogDisplay = ({
   bestlap?: number;
   predicted?: number;
   overall?: number;
+  dirty?: boolean;
   history?: LapEntry[];
 }) => {
 
@@ -173,15 +198,15 @@ export const LapTimeLogDisplay = ({
     delta > 0;
 
   // for the flash
-  let bgColor = "bg-slate-900/70";
+  let bgColor = "bg-slate-900/[var(--fg-alpha)]";
   if (current !== undefined && current <= 5) {
     const isSessionBest = lastlap !== undefined && lastlap > 0 && overall !== undefined && overall > 0 && Math.abs(lastlap - overall) < 0.001;
     const isPersonalBest = lastlap !== undefined && lastlap > 0 && bestlap !== undefined && bestlap > 0 && Math.abs(lastlap - bestlap) < 0.001;
-    bgColor = "bg-slate-700";
+    bgColor = "bg-slate-800";
     if (isPersonalBest) bgColor = "bg-green-700";
     if (isSessionBest) bgColor = "bg-purple-800";
   }
-  
+ 
   return (
     <div
       className="w-full text-sm bg-slate-800/[var(--bg-opacity)] rounded-md p-1 text-white"
@@ -194,8 +219,9 @@ export const LapTimeLogDisplay = ({
         {settings.config.showCurrentLap && (
         <div 
           id="current-lap"
-          className={`text-[1.8em] w-full p-1 ${bgColor} flex relative items-center justify-center rounded-sm transition-colors duration-500`}         
-        >
+          className={`text-[1.8em] w-full p-1 ${bgColor} flex relative items-center justify-center rounded-sm transition-colors duration-500`}  
+          style={{ '--fg-alpha': `${settings?.config.foreground.opacity}%` } as React.CSSProperties}              
+        >          
           <div className="absolute left-2">
             <TimerIcon weight="bold" />
           </div>
@@ -207,18 +233,26 @@ export const LapTimeLogDisplay = ({
 
         {/* Predicted (With Delta) */}
         {settings.config.showPredictedLap && (
-        <div className="text-[1.3em] w-full p-1 bg-slate-900/60 flex relative items-center justify-center rounded-sm">
+        <div 
+          id="predicted-lap"
+          className={`text-[1.3em] w-full p-1 ${(dirty ? 'text-zinc-400' : 'text-white')} bg-slate-900/[var(--fg-alpha)] flex relative items-center justify-center rounded-sm`}
+          style={{ '--fg-alpha': `${settings?.config.foreground.opacity / 2}%` } as React.CSSProperties}       
+          >
           <div className="absolute left-3">
-            <TargetIcon weight="regular" />
+            {dirty ? (
+              <XIcon weight="regular" />
+            ) : (
+              <TargetIcon weight="regular" />
+            )}
           </div>
           <div className="w-full text-center tabular-nums">
             {formatTime(current !== undefined && current > 5 ? predicted : lastlap)}
           </div>
           {settings.config.delta?.enabled && (
           <div className={`absolute right-2 text-center tabular-nums ${
-              deltaIsGreen 
+              !dirty && deltaIsGreen 
                 ? 'text-green-400' 
-                : (deltaIsRed ? 'text-red-400' : 'text-zinc-500')
+                : (!dirty && deltaIsRed ? 'text-red-400' : 'text-zinc-400')
             }`}>
             {formatDelta(current !== undefined && current > 5 ? delta : 0)}
           </div>
@@ -228,10 +262,10 @@ export const LapTimeLogDisplay = ({
 
         {/* Main Stats */}
         {settings.config.showLastLap && (
-        <LapTimeRow label="LAST" time={lastlap} delta={(lastlap ?? 0) - (deltalap ?? 0)} best={bestlap} overall={overall} />
+        <LapTimeRow label="LAST" time={lastlap} delta={(lastlap ?? 0) - (deltalap ?? 0)} best={bestlap} overall={overall} settings={settings} />
         )}
         {settings.config.showBestLap && (
-        <LapTimeRow label="BEST" time={bestlap} delta={(bestlap ?? 0) - (deltalap ?? 0)} best={bestlap} overall={overall} />
+        <LapTimeRow label="BEST" time={bestlap} delta={(bestlap ?? 0) - (deltalap ?? 0)} best={bestlap} overall={overall} settings={settings} />
         )}
         
         {/* History List */}
@@ -243,8 +277,9 @@ export const LapTimeLogDisplay = ({
               label={`LAP ${entry.lap}`}
               time={entry.time}
               delta={entry.delta}
+              dirty={entry.dirty}
               best={bestlap}
-              overall={overall}
+              overall={overall}              
               settings={settings}
             />
           ))}

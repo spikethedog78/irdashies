@@ -33,6 +33,7 @@ const mockConfig = (
 ): LapTimeLogConfig => {
   const baseConfig: LapTimeLogConfig = {
     background: { opacity: 80 },
+    foreground: { opacity: 70 },
     scale: 100,
     showCurrentLap: true,
     showPredictedLap: true,
@@ -141,6 +142,20 @@ export const CompactAndPredicted: Story = {
     ...baseArgs,
     settings: mockSettings({
       delta: { enabled: true, method: 'lastlap' },
+      showLastLap: false,
+      showBestLap: false,
+      history: { enabled: false, count: 5 },
+    }),
+  },
+};
+
+export const DirtyLap: Story = {
+  name: 'Invalid Dirty Lap',
+  args: {
+    ...baseArgs,
+    dirty: true,
+    settings: mockSettings({
+      delta: { enabled: true, method: 'lastlap' },      
       showLastLap: false,
       showBestLap: false,
       history: { enabled: false, count: 5 },

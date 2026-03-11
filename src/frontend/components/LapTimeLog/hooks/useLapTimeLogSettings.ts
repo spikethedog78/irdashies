@@ -20,6 +20,9 @@ const DEFAULT_CONFIG: LapTimeLogWidgetSettings = {
     background: {
       opacity: 80,
     },
+    foreground: { 
+      opacity: 70 
+    },
     sessionVisibility: {
       race: true,
       loneQualify: true,
@@ -47,6 +50,11 @@ export const useLapTimeLogSettings = () => {
           opacity:
             saved.config.background?.opacity ??
             DEFAULT_CONFIG.config.background.opacity,
+        },
+        foreground: {
+          opacity:
+            saved.config.foreground?.opacity ??
+            DEFAULT_CONFIG.config.foreground.opacity,
         },
         scale: saved.config?.scale ?? DEFAULT_CONFIG.config.scale,
         showCurrentLap: saved.config?.showCurrentLap ?? DEFAULT_CONFIG.config.showCurrentLap,

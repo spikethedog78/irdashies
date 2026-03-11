@@ -1,15 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { LapTimeLogDisplay } from './LapTimeLog';
-import { LapTimeRow, formatTime, formatDelta } from './components/LapTimeRow';
+import { LapTimeRow, formatDelta } from './components/LapTimeRow';
 import type { LapTimeLogWidgetSettings } from '@irdashies/types';
+import { formatTime } from '@irdashies/utils/time';
 
 // Mock settings for tests
 const mockSettings = (
   overrides: Partial<LapTimeLogWidgetSettings['config']> = {}
 ): LapTimeLogWidgetSettings => {
   const baseConfig: LapTimeLogWidgetSettings['config'] = {
-    background: { opacity: 30 },
+    background: { opacity: 80 },
+    foreground: { opacity: 70 },
     scale: 100,
     showCurrentLap: true,
     showPredictedLap: true,
@@ -47,29 +49,27 @@ const mockSettings = (
 
 describe('LapTimeLog helpers', () => {
   describe('formatTime', () => {
-    it('should format zero or invalid times correctly', () => {
-      expect(formatTime(undefined)).toBe('00:00.000');
-      expect(formatTime(0)).toBe('00:00.000');
-      expect(formatTime(-10)).toBe('00:00.000');
+    it('should format zero times correctly', () => {
+      expect(formatTime(0)).toBe('0:00.000');
     });
 
     it('should format times under a minute', () => {
-      expect(formatTime(59.123)).toBe('00:59.123');
+      expect(formatTime(59.123)).toBe('0:59.123');
     });
 
     it('should format times over a minute', () => {
-      expect(formatTime(92.456)).toBe('01:32.456');
+      expect(formatTime(92.456)).toBe('1:32.456');
     });
 
     it('should pad seconds correctly', () => {
-      expect(formatTime(65.1)).toBe('01:05.100');
+      expect(formatTime(65.1)).toBe('1:05.100');
     });
   });
 
   describe('formatDelta', () => {
     it('should handle zero or undefined delta', () => {
-      expect(formatDelta(undefined)).toBe('---');
-      expect(formatDelta(0)).toBe('---');
+      expect(formatDelta(undefined)).toBe('');
+      expect(formatDelta(0)).toBe('');
     });
 
     it('should format positive delta', () => {
@@ -86,7 +86,7 @@ describe('LapTimeRow', () => {
   it('renders label and time', () => {
     render(<LapTimeRow label="LAST" time={90.123} settings={mockSettings()} />);
     expect(screen.getByText('LAST')).toBeInTheDocument();
-    expect(screen.getByText('01:30.123')).toBeInTheDocument();
+    expect(screen.getByText('1:30.123')).toBeInTheDocument();
   });
 
   it('renders delta when provided', () => {
@@ -106,7 +106,7 @@ describe('LapTimeRow', () => {
 
   it('applies green color for personal best lap', () => {
     render(<LapTimeRow label="LAST" time={90} best={90} settings={mockSettings()} />);
-    const timeElement = screen.getByText('01:30.000');
+    const timeElement = screen.getByText('1:30.000');
     expect(timeElement).toHaveClass('text-green-400');
   });
 
@@ -114,7 +114,7 @@ describe('LapTimeRow', () => {
     render(
       <LapTimeRow label="LAST" time={90} best={91} overall={90} settings={mockSettings()} />
     );
-    const timeElement = screen.getByText('01:30.000');
+    const timeElement = screen.getByText('1:30.000');
     expect(timeElement).toHaveClass('text-purple-400');
   });
 });
@@ -136,8 +136,8 @@ describe('LapTimeLogDisplay', () => {
   it('renders all sections when enabled', () => {
     render(<LapTimeLogDisplay {...defaultProps} />);
 
-    expect(screen.getByText('00:10.500')).toBeInTheDocument(); // Current
-    expect(screen.getByText('01:31.300')).toBeInTheDocument(); // Predicted
+    expect(screen.getByText('0:10.500')).toBeInTheDocument(); // Current
+    expect(screen.getByText('1:31.300')).toBeInTheDocument(); // Predicted
     expect(screen.getByText('-0.200')).toBeInTheDocument(); // Predicted Delta
     expect(screen.getByText('LAST')).toBeInTheDocument();
     expect(screen.getByText('BEST')).toBeInTheDocument();
@@ -154,8 +154,8 @@ describe('LapTimeLogDisplay', () => {
     });
     render(<LapTimeLogDisplay {...defaultProps} settings={settings} />);
 
-    expect(screen.queryByText('00:10.500')).not.toBeInTheDocument();
-    expect(screen.queryByText('01:31.300')).not.toBeInTheDocument();
+    expect(screen.queryByText('0:10.500')).not.toBeInTheDocument();
+    expect(screen.queryByText('1:31.300')).not.toBeInTheDocument();
     expect(screen.queryByText('LAST')).not.toBeInTheDocument();
     expect(screen.queryByText('BEST')).not.toBeInTheDocument();
     expect(screen.queryByText('LAP 10')).not.toBeInTheDocument();
@@ -164,7 +164,7 @@ describe('LapTimeLogDisplay', () => {
   it('shows last lap time in main timer for first 5 seconds of a new lap', () => {
     const { container } = render(<LapTimeLogDisplay {...defaultProps} current={4.9} />);
     const mainTimer = container.querySelector('#current-lap'); 
-    expect(mainTimer).toHaveTextContent('01:32.100');
+    expect(mainTimer).toHaveTextContent('1:32.100');
   });
 
   it('flashes green for a new personal best lap', () => {
@@ -177,7 +177,7 @@ describe('LapTimeLogDisplay', () => {
 
   it('flashes purple for a new session best lap', () => {
     const { container } = render(
-      <LapTimeLogDisplay {...defaultProps} current={4.9} lastlap={91.0} bestlap={91.2} overall={91.0} />
+      <LapTimeLogDisplay {...defaultProps} current={4.9} lastlap={91.0} bestlap={91.0} overall={91.0} />
     );
     const mainTimerWrapper = container.querySelector('#current-lap');
     expect(mainTimerWrapper).toHaveClass('bg-purple-800');

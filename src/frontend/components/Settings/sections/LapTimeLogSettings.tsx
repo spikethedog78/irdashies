@@ -220,6 +220,21 @@ export const LapTimeLogSettings = () => {
                   }
                 /> 
 
+                {/* Foreground Opacity */}
+                <SettingSliderRow
+                  title="Foreground Opacity"
+                  value={settings.config.foreground?.opacity ?? 30}
+                  units="%"
+                  min={0}
+                  max={100}
+                  step={5}
+                  onChange={(v) =>
+                    handleConfigChange({
+                      foreground: { opacity: v },
+                    })
+                  }
+                /> 
+
                 {/* Scale */}
                 <SettingSliderRow
                   title="Scale"

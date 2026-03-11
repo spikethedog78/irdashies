@@ -446,6 +446,7 @@ export interface LapTimeLogConfig {
   },
   scale: number;
   background: { opacity: number };
+  foreground: { opacity: number };
   sessionVisibility: SessionVisibilitySettings;
 }
 

@@ -1,20 +1,15 @@
 import type { LapTimeLogWidgetSettings } from '@irdashies/types';
+import { formatTime } from '@irdashies/utils/time';
 
 interface LapTimeRowProps {
   label: string;
   time: number | undefined; 
   delta?: number | undefined; 
+  dirty?: boolean;
   best?: number | undefined;
-  overall?: number | undefined;
+  overall?: number | undefined; 
   settings?: LapTimeLogWidgetSettings
 }
-
-export const formatTime = (t: number | undefined) => {
-  if (!t || t <= 0) return "00:00.000";
-  const mins = Math.floor(t / 60);
-  const secs = (Math.floor((t % 60) * 1000) / 1000).toFixed(3).padStart(6, '0');
-  return `${mins.toString().padStart(2, '0')}:${secs}`;
-};
 
 export const formatDelta = (delta: number | undefined) => {
   if (delta === undefined || delta === 0) return "";
@@ -26,7 +21,7 @@ export const formatDelta = (delta: number | undefined) => {
   return formatter.format(delta);
 };
 
-export const LapTimeRow = ({ label, time, delta, best, overall, settings }: LapTimeRowProps) => {
+export const LapTimeRow = ({ label, time, delta, dirty, best, overall, settings }: LapTimeRowProps) => {
   
   const isGreen = 
     time !== undefined && 
@@ -40,17 +35,31 @@ export const LapTimeRow = ({ label, time, delta, best, overall, settings }: LapT
     time > 0 && 
     time <= overall;
 
+  const isDirty = dirty ?? false;
+
   const deltaIsGreen = 
     delta !== undefined &&    
     delta < 0;
 
   const deltaIsRed = 
     delta !== undefined &&    
-    delta > 0;
+    delta > 0;  
+
+  const opacity = settings?.config?.foreground?.opacity ?? 0;
+
+  const getLapColor = () => {
+    if (isDirty) return 'text-zinc-400';
+    if (isPurple) return 'text-purple-400';
+    if (isGreen) return 'text-green-400';
+    return 'text-white';
+  };
 
   return (
-    <div className="flex w-full text-[1em] py-0.5 px-2 odd:bg-slate-800/40 even:bg-slate-900/40">
-      <span className="flex-1 text-white tabular-nums uppercase">
+      <div
+        className="flex w-full text-[1em] py-0.5 px-2 odd:bg-slate-800/[var(--fg-alpha)] even:bg-slate-900/[var(--fg-alpha)]"
+        style={{ '--fg-alpha': `${opacity / 3}%` } as React.CSSProperties}       
+      >
+      <span className="flex-1 ${textColor} tabular-nums uppercase">
         {label}
       </span>
       {settings?.config.delta?.enabled && (
@@ -62,11 +71,7 @@ export const LapTimeRow = ({ label, time, delta, best, overall, settings }: LapT
         {formatDelta(delta)}
       </span>
       )}
-      <span className={`flex-1 text-right tabular-nums ${
-          isPurple 
-            ? 'text-purple-400' 
-            : (isGreen ? 'text-green-400' : 'text-zinc-100')
-        }`}>
+      <span className={`flex-1 text-right tabular-nums ${getLapColor()}`}>
         {formatTime(time)}
       </span>
     </div>
