@@ -78,12 +78,7 @@ export const LapTimeLog = () => {
   const predictedLap = (referenceTime && referenceTime > 0) ? (referenceTime + liveDelta) : 0;
 
   // check for dirty lap
-  const deltaChecks = {
-    lastlap: useTelemetryValue<number>('LapDeltaToSessionLastlLap') ?? 0,    
-    bestlap: useTelemetryValue<number>('LapDeltaToBestLap') ?? 0,
-    overall: useTelemetryValue<number>('LapDeltaToSessionBestLap') ?? 0,
-  };
-  const isDeltaOk = deltaChecks[settings.config.delta?.method] ?? true;
+  const isDeltaOk = useTelemetryValue<number>('LapDeltaToBestLap_OK') ?? true;
   const isDirty = currentLapTime > 5 && !isDeltaOk;
 
   // history
@@ -104,11 +99,10 @@ export const LapTimeLog = () => {
       // Log new lap
       if (!isNewLap || !isValidTime) return prev;
       if (prev.some((entry) => entry.lap === lapCompleted)) return prev;
-      const currentTarget = referenceAtStartOfLap.current;    
       const newEntry: LapEntry = {
         lap: lapCompleted,
         time: lastLapTime,
-        delta: currentTarget !== undefined && currentTarget > 0 ? lastLapTime - currentTarget : 0,
+        delta: referenceAtStartOfLap.current ? lastLapTime - referenceAtStartOfLap.current : 0,
         dirty: isDirty
       };
       lastLoggedLap.current = lapCompleted;
@@ -117,7 +111,7 @@ export const LapTimeLog = () => {
     });
     prevSessionNum.current = sessionNum;
     prevSessionTime.current = sessionTime;
-  }, [sessionNum, sessionTime, lapCompleted, lastLapTime, isDirty, referenceAtStartOfLap]);
+  }, [sessionNum, sessionTime, lapCompleted, lastLapTime, isDirty]);
 
   // demo mode
   if (isDemoMode) {
