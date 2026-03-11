@@ -86,7 +86,7 @@ export const LapTimeLogSettings = () => {
              
                 <SettingToggleRow
                   title="Show Current Lap"
-                  description="Work in progress"
+                  description="Display the live lap time for the current lap."
                   enabled={settings.config.showCurrentLap ?? true}
                   onToggle={(newValue) =>
                     handleConfigChange({ showCurrentLap: newValue })
@@ -95,7 +95,7 @@ export const LapTimeLogSettings = () => {
 
                 <SettingToggleRow
                   title="Show Predicted Lap"
-                  description="Work in progress"
+                  description="Show the current predicted lap based on the current delta time."
                   enabled={settings.config.showPredictedLap ?? true}
                   onToggle={(newValue) =>
                     handleConfigChange({ showPredictedLap: newValue })
@@ -104,7 +104,7 @@ export const LapTimeLogSettings = () => {
 
                 <SettingToggleRow
                   title="Show Last Lap"
-                  description="Work in progress"
+                  description="Show the driver's last lap time."
                   enabled={settings.config.showLastLap ?? true}
                   onToggle={(newValue) =>
                     handleConfigChange({ showLastLap: newValue })
@@ -113,7 +113,7 @@ export const LapTimeLogSettings = () => {
 
                 <SettingToggleRow
                   title="Show Best Lap"
-                  description="Work in progress"
+                  description="Show the driver's best lap time."
                   enabled={settings.config.showBestLap ?? true}
                   onToggle={(newValue) =>
                     handleConfigChange({ showBestLap: newValue })
@@ -162,7 +162,7 @@ export const LapTimeLogSettings = () => {
 
                 <SettingToggleRow
                   title="Show Lap History"
-                  description="Work in progress"
+                  description="Show the driver's lap history. You can configure how many to show below."
                   enabled={settings.config.history?.enabled ?? true}
                   onToggle={(v) =>
                     handleConfigChange({                     
