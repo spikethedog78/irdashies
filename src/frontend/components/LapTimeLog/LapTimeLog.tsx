@@ -44,6 +44,7 @@ export const LapTimeLog = () => {
   const prevSessionNum = useRef<number>(sessionNum);
   const prevSessionTime = useRef<number>(sessionTime);
   const referenceAtStartOfLap = useRef<number>(0);
+  const referenceIsDirty = useRef<boolean>(false);
 
   // calculate overall best
   const sessionBestOverall = useMemo(() => {
@@ -80,6 +81,11 @@ export const LapTimeLog = () => {
   // check for dirty lap
   const isDeltaOk = useTelemetryValue<number>('LapDeltaToBestLap_OK') ?? true;
   const isDirty = currentLapTime > 5 && !isDeltaOk;
+  useEffect(() => {
+    if (currentLapTime > 5) {
+      referenceIsDirty.current = isDirty;
+    }
+  }, [currentLapTime, isDirty]);
 
   // history
   useEffect(() => {
@@ -103,7 +109,7 @@ export const LapTimeLog = () => {
         lap: lapCompleted,
         time: lastLapTime,
         delta: referenceAtStartOfLap.current ? lastLapTime - referenceAtStartOfLap.current : 0,
-        dirty: isDirty
+        dirty: referenceIsDirty.current
       };
       lastLoggedLap.current = lapCompleted;
       lastLoggedTime.current = lastLapTime;
@@ -111,7 +117,7 @@ export const LapTimeLog = () => {
     });
     prevSessionNum.current = sessionNum;
     prevSessionTime.current = sessionTime;
-  }, [sessionNum, sessionTime, lapCompleted, lastLapTime, isDirty]);
+  }, [sessionNum, sessionTime, lapCompleted, lastLapTime]);
 
   // demo mode
   if (isDemoMode) {
