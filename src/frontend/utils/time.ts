@@ -4,7 +4,7 @@ export const formatTime = (seconds?: number, format: TimeFormat = 'full'): strin
   if (seconds === undefined) return '';
   if (seconds < 0) return '';
 
-  const ms = Math.round((seconds % 1) * 1000); // Get milliseconds
+  const ms = Math.floor((seconds % 1) * 1000); // Get milliseconds
   const totalSeconds = Math.floor(seconds); // Get total whole seconds
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);

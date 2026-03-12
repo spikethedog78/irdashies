@@ -28,7 +28,9 @@ export const LapTimeLog = () => {
   const playerIndex = useFocusCarIdx();
   const { isDriving } = useDrivingState();
   const [history, setHistory] = useState<LapEntry[]>([]);
-  
+  const [isDirty, setIsDirty] = useState(false);
+  const [predictedLap, setPredictedLap] = useState<number>(0);
+
   // get telemetry
   const lapCompleted = useTelemetryValue<number>('LapCompleted') ?? 0;
   const currentLapTime = useTelemetryValue<number>('LapCurrentLapTime') ?? 0;
@@ -37,6 +39,8 @@ export const LapTimeLog = () => {
   const carIdxBestLapTime = useTelemetryValues<number[]>('CarIdxBestLapTime') ?? 0;
   const sessionNum = useTelemetryValue<number>('SessionNum') ?? 0;
   const sessionTime = useTelemetryValue<number>('SessionTime') ?? 0;
+  const playerTrackSurface = useTelemetryValue<number>('PlayerTrackSurface') ?? 0;
+  const incidentCount = useTelemetryValue<number>('PlayerCarMyIncidentCount') ?? 0;
 
   // Refs for tracking state changes
   const lastLoggedLap = useRef<number>(-1);
@@ -44,7 +48,8 @@ export const LapTimeLog = () => {
   const prevSessionNum = useRef<number>(sessionNum);
   const prevSessionTime = useRef<number>(sessionTime);
   const referenceAtStartOfLap = useRef<number>(0);
-  const referenceIsDirty = useRef<boolean>(false);
+  const incidentsAtLapStart = useRef<number>(incidentCount);
+  const lastValidPrediction = useRef(0);
 
   // calculate overall best
   const sessionBestOverall = useMemo(() => {
@@ -64,7 +69,7 @@ export const LapTimeLog = () => {
 
   // save current delta target
   useEffect(() => {
-    if (currentLapTime > 5 && referenceTime && referenceTime > 0) {
+    if (currentLapTime > 0 && referenceTime && referenceTime > 0) {
       referenceAtStartOfLap.current = referenceTime;
     }
   }, [currentLapTime, referenceTime]);
@@ -76,16 +81,35 @@ export const LapTimeLog = () => {
     overall: useTelemetryValue<number>('LapDeltaToSessionBestLap') ?? 0,
   };
   const liveDelta = deltas[settings.config.delta?.method] ?? deltas.bestlap;
-  const predictedLap = (referenceTime && referenceTime > 0) ? (referenceTime + liveDelta) : 0;
+
+  useEffect(() => {
+    setPredictedLap((prev) => {
+      const currentPrediction = (referenceTime && referenceTime > 0) ? (referenceTime + liveDelta) : 0;
+      if (currentPrediction > currentLapTime) {
+        lastValidPrediction.current = currentPrediction;
+        return currentPrediction;
+      }
+      return prev;
+    }); 
+  }, [lapCompleted, currentLapTime, liveDelta, referenceTime]);
 
   // check for dirty lap
-  const isDeltaOk = useTelemetryValue<number>('LapDeltaToBestLap_OK') ?? true;
-  const isDirty = currentLapTime > 5 && !isDeltaOk;
   useEffect(() => {
-    if (currentLapTime > 5) {
-      referenceIsDirty.current = isDirty;
-    }
-  }, [currentLapTime, isDirty]);
+    setIsDirty((prev) => {
+      if (currentLapTime < 1) {
+        incidentsAtLapStart.current = incidentCount;
+        return false;
+      }
+      if (currentLapTime > 1 && !prev) {
+        const offTrack = playerTrackSurface === 4;
+        const incidentOccurred = incidentCount > incidentsAtLapStart.current;
+        if (offTrack || incidentOccurred) {
+          return true;
+        }
+      }
+      return prev;
+    }); 
+  }, [lapCompleted, incidentCount, playerTrackSurface, currentLapTime]);
 
   // history
   useEffect(() => {
@@ -99,7 +123,7 @@ export const LapTimeLog = () => {
         lastLoggedLap.current = -1;
         lastLoggedTime.current = -1;
         prevSessionNum.current = sessionNum;
-        prevSessionTime.current = sessionTime;
+        prevSessionTime.current = sessionTime;        
         return [];
       }
       // Log new lap
@@ -109,7 +133,7 @@ export const LapTimeLog = () => {
         lap: lapCompleted,
         time: lastLapTime,
         delta: referenceAtStartOfLap.current ? lastLapTime - referenceAtStartOfLap.current : 0,
-        dirty: referenceIsDirty.current
+        dirty: isDirty
       };
       lastLoggedLap.current = lapCompleted;
       lastLoggedTime.current = lastLapTime;
@@ -117,7 +141,7 @@ export const LapTimeLog = () => {
     });
     prevSessionNum.current = sessionNum;
     prevSessionTime.current = sessionTime;
-  }, [sessionNum, sessionTime, lapCompleted, lastLapTime]);
+  }, [sessionNum, sessionTime, lapCompleted, lastLapTime, isDirty]);
 
   // demo mode
   if (isDemoMode) {
@@ -191,9 +215,13 @@ export const LapTimeLogDisplay = ({
     : bestlap;
   const delta = (predicted ?? 0) - (deltalap ?? 0);
   const deltaIsGreen = 
+    current !== undefined && 
+    current > 5 &&
     delta !== undefined &&    
     delta < 0;
   const deltaIsRed = 
+    current !== undefined && 
+    current > 5 &&
     delta !== undefined &&    
     delta > 0;
 
@@ -219,14 +247,14 @@ export const LapTimeLogDisplay = ({
         {settings.config.showCurrentLap && (
         <div 
           id="current-lap"
-          className={`text-[1.8em] w-full p-1 ${bgColor} flex relative items-center justify-center rounded-sm transition-colors duration-500`}  
+          className={`text-[1.8em] min-h-[2em] w-full p-1 ${bgColor} flex relative items-center justify-center rounded-sm transition-colors duration-500`}  
           style={{ '--fg-alpha': `${settings?.config.foreground.opacity}%` } as React.CSSProperties}              
         >          
           <div className="absolute left-2">
             <TimerIcon weight="bold" />
           </div>
           <div className="w-full text-center tabular-nums">
-            {formatTime(current !== undefined && current > 5 ? current : lastlap)}
+            {formatTime(current !== undefined && current > 5 ? current : (lastlap !== undefined && lastlap > 0 ? lastlap : current))}
           </div>
         </div>
         )}
@@ -235,7 +263,7 @@ export const LapTimeLogDisplay = ({
         {settings.config.showPredictedLap && (
         <div 
           id="predicted-lap"
-          className={`text-[1.3em] w-full p-1 ${(dirty ? 'text-zinc-400' : 'text-white')} bg-slate-900/[var(--fg-alpha)] flex relative items-center justify-center rounded-sm`}
+          className={`text-[1.3em] min-h-[2em] w-full p-1 ${(dirty ? 'text-zinc-400' : 'text-white')} bg-slate-900/[var(--fg-alpha)] flex relative items-center justify-center rounded-sm`}
           style={{ '--fg-alpha': `${settings?.config.foreground.opacity / 2}%` } as React.CSSProperties}       
           >
           <div className="absolute left-3">
@@ -246,7 +274,7 @@ export const LapTimeLogDisplay = ({
             )}
           </div>
           <div className="w-full text-center tabular-nums">
-            {formatTime(current !== undefined && current > 5 ? predicted : lastlap)}
+            {current !== undefined && current > 5 ? formatTime(predicted) : ''}
           </div>
           {settings.config.delta?.enabled && (
           <div className={`absolute right-2 text-center tabular-nums ${
