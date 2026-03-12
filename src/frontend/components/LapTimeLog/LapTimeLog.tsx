@@ -28,7 +28,8 @@ export const LapTimeLog = () => {
   const playerIndex = useFocusCarIdx();
   const { isDriving } = useDrivingState();
   const [history, setHistory] = useState<LapEntry[]>([]);
-  
+  const [isDirty, setIsDirty] = useState(false);
+
   // get telemetry
   const lapCompleted = useTelemetryValue<number>('LapCompleted') ?? 0;
   const currentLapTime = useTelemetryValue<number>('LapCurrentLapTime') ?? 0;
@@ -37,6 +38,8 @@ export const LapTimeLog = () => {
   const carIdxBestLapTime = useTelemetryValues<number[]>('CarIdxBestLapTime') ?? 0;
   const sessionNum = useTelemetryValue<number>('SessionNum') ?? 0;
   const sessionTime = useTelemetryValue<number>('SessionTime') ?? 0;
+  const playerTrackSurface = useTelemetryValue<number>('PlayerTrackSurface') ?? 0;
+  const incidentCount = useTelemetryValue<number>('PlayerCarMyIncidentCount') ?? 0;
 
   // Refs for tracking state changes
   const lastLoggedLap = useRef<number>(-1);
@@ -44,6 +47,8 @@ export const LapTimeLog = () => {
   const prevSessionNum = useRef<number>(sessionNum);
   const prevSessionTime = useRef<number>(sessionTime);
   const referenceAtStartOfLap = useRef<number>(0);
+  const incidentsAtLapStart = useRef<number>(incidentCount);
+  const lapAtLastCheck = useRef<number>(lapCompleted);
 
   // calculate overall best
   const sessionBestOverall = useMemo(() => {
@@ -78,8 +83,23 @@ export const LapTimeLog = () => {
   const predictedLap = (referenceTime && referenceTime > 0) ? (referenceTime + liveDelta) : 0;
 
   // check for dirty lap
-  const isDeltaOk = useTelemetryValue<number>('LapDeltaToBestLap_OK') ?? true;
-  const isDirty = currentLapTime > 5 && !isDeltaOk;
+  useEffect(() => {
+    setIsDirty((prev) => {
+      if (lapCompleted > lapAtLastCheck.current) {
+        incidentsAtLapStart.current = incidentCount;
+        lapAtLastCheck.current = lapCompleted;
+        return false;
+      }
+      if (currentLapTime > 0.5 && !prev) {
+        const offTrack = playerTrackSurface === 4;
+        const incidentOccurred = incidentCount > incidentsAtLapStart.current;
+        if (offTrack || incidentOccurred) {
+          return true;
+        }
+      }
+      return prev;
+    }); 
+  }, [lapCompleted, incidentCount, playerTrackSurface, currentLapTime]);
 
   // history
   useEffect(() => {
@@ -93,7 +113,7 @@ export const LapTimeLog = () => {
         lastLoggedLap.current = -1;
         lastLoggedTime.current = -1;
         prevSessionNum.current = sessionNum;
-        prevSessionTime.current = sessionTime;
+        prevSessionTime.current = sessionTime;        
         return [];
       }
       // Log new lap
