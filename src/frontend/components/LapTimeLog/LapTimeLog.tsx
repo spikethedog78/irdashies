@@ -20,7 +20,8 @@ import { formatDelta } from './components/LapTimeRow';
 import { formatTime } from '@irdashies/utils/time';
 
 const TRACK_SURFACE_OFF_TRACK = 4;
-const MIN_LIVE_LAP_TIME = 5;
+const LAP_CHANGE_TIME = 0.5;
+const FREEZE_TIME = 5;
 const MAX_HISTORY_ENTRIES = 10;
 
 export const LapTimeLog = () => {
@@ -111,11 +112,11 @@ export const LapTimeLog = () => {
   // check for dirty lap
   useEffect(() => {
     setIsDirty((prev) => {
-      if (currentLapTime < 0.5) {
+      if (currentLapTime < LAP_CHANGE_TIME) {
         incidentsAtLapStart.current = incidentCount;
         return false;
       }
-      if (currentLapTime > 0.5 && !prev) {
+      if (currentLapTime > LAP_CHANGE_TIME && !prev) {
         const offTrack = playerTrackSurface === TRACK_SURFACE_OFF_TRACK;
         const incidentOccurred = incidentCount > incidentsAtLapStart.current;
         if (offTrack || incidentOccurred) {
@@ -250,7 +251,7 @@ export const LapTimeLogDisplay = ({
 
   // for the flash
   let bgColor = 'bg-slate-900/[var(--fg-alpha)]';
-  if (current !== undefined && current <= MIN_LIVE_LAP_TIME) {
+  if (current !== undefined && current <= FREEZE_TIME) {
     const isSessionBest =
       lastlap !== undefined &&
       lastlap > 0 &&
@@ -299,7 +300,7 @@ export const LapTimeLogDisplay = ({
             </div>
             <div className="w-full text-center tabular-nums">
               {formatTime(
-                current !== undefined && current > MIN_LIVE_LAP_TIME ? current : lastlap
+                current !== undefined && current > FREEZE_TIME ? current : lastlap
               )}
             </div>
           </div>
@@ -325,7 +326,7 @@ export const LapTimeLogDisplay = ({
             </div>
             <div className="w-full text-center tabular-nums">
               {formatTime(
-                current !== undefined && current > MIN_LIVE_LAP_TIME ? predicted : lastlap
+                current !== undefined && current > FREEZE_TIME ? predicted : lastlap
               )}
             </div>
             {settings.config.delta?.enabled && (
@@ -338,7 +339,7 @@ export const LapTimeLogDisplay = ({
                       : 'text-zinc-400'
                 }`}
               >
-                {formatDelta(current !== undefined && current > MIN_LIVE_LAP_TIME ? delta : 0)}
+                {formatDelta(current !== undefined && current > FREEZE_TIME ? delta : 0)}
               </div>
             )}
           </div>
