@@ -68,8 +68,8 @@ describe('LapTimeLog helpers', () => {
 
   describe('formatDelta', () => {
     it('should handle zero or undefined delta', () => {
-      expect(formatDelta(undefined)).toBe('');
-      expect(formatDelta(0)).toBe('');
+      expect(formatDelta(undefined)).toBe('---');
+      expect(formatDelta(0)).toBe('---');
     });
 
     it('should format positive delta', () => {
