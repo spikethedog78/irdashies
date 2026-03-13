@@ -54,6 +54,7 @@ export const LapTimeLog = () => {
   const referenceAtStartOfLap = useRef<number>(0);
   const incidentsAtLapStart = useRef<number>(incidentCount);
   const lastValidPrediction = useRef(0);
+  const lastPredictionUpdate = useRef(0);
 
   // calculate overall best
   const sessionBestOverall = useMemo(() => {
@@ -91,21 +92,26 @@ export const LapTimeLog = () => {
   };
   const liveDelta = deltas[settings.config.delta?.method] ?? deltas.bestlap;
 
+  // update predicted lap
   useEffect(() => {
-    setPredictedLap((prev) => {
-      const currentPrediction = (referenceTime && referenceTime > 0) ? (referenceTime + liveDelta) : 0;
-      if (currentPrediction > currentLapTime) {
-        lastValidPrediction.current = currentPrediction;
-        return currentPrediction;
-      }
-      return prev;
-    }); 
+    const now = Date.now();
+    if (now - lastPredictionUpdate.current >= 100) {
+      setPredictedLap((prev) => {
+        const currentPrediction = (referenceTime && referenceTime > 0) ? (referenceTime + liveDelta) : 0;
+        if (currentPrediction > currentLapTime) {
+          lastValidPrediction.current = currentPrediction;
+          lastPredictionUpdate.current = now;
+          return currentPrediction;
+        }
+        return prev;
+      }); 
+    }
   }, [lapCompleted, currentLapTime, liveDelta, referenceTime]);
 
   // check for dirty lap
   useEffect(() => {
     setIsDirty((prev) => {
-      if (currentLapTime < 1) {
+      if (currentLapTime < 0.5) {
         incidentsAtLapStart.current = incidentCount;
         return false;
       }
