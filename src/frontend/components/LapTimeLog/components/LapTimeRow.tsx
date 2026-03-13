@@ -12,7 +12,7 @@ interface LapTimeRowProps {
 }
 
 export const formatDelta = (delta: number | undefined) => {
-  if (delta === undefined || delta === 0) return "";
+  if (delta === undefined || delta === 0) return "---";
   const formatter = new Intl.NumberFormat('en-US', {
     signDisplay: 'always',
     minimumFractionDigits: 3,
@@ -38,10 +38,14 @@ export const LapTimeRow = ({ label, time, delta, dirty, best, overall, settings 
   const isDirty = dirty ?? false;
 
   const deltaIsGreen = 
+    time !== undefined &&
+    time > 0 &&
     delta !== undefined &&    
     delta < 0;
 
   const deltaIsRed = 
+    time !== undefined &&
+    time > 0 &&
     delta !== undefined &&    
     delta > 0;  
 
@@ -68,7 +72,7 @@ export const LapTimeRow = ({ label, time, delta, dirty, best, overall, settings 
             ? 'text-green-400' 
             : (deltaIsRed ? 'text-red-400' : 'text-zinc-500')
         }`}>
-        {formatDelta(delta)}
+        {formatDelta(time !== undefined && time > 0 ? delta : 0)}
       </span>
       )}
       <span className={`flex-1 text-right tabular-nums ${getLapColor()}`}>

@@ -33,6 +33,7 @@ export const LapTimeLog = () => {
   const { isDriving } = useDrivingState();
   const [history, setHistory] = useState<LapEntry[]>([]);
   const [isDirty, setIsDirty] = useState(false);
+  const [predictedLap, setPredictedLap] = useState<number>(0);
 
   // get telemetry
   const lapCompleted = useTelemetryValue<number>('LapCompleted') ?? 0;
@@ -52,7 +53,7 @@ export const LapTimeLog = () => {
   const prevSessionTime = useRef<number>(sessionTime);
   const referenceAtStartOfLap = useRef<number>(0);
   const incidentsAtLapStart = useRef<number>(incidentCount);
-  const lapAtLastCheck = useRef<number>(lapCompleted);
+  const lastValidPrediction = useRef(0);
 
   // calculate overall best
   const sessionBestOverall = useMemo(() => {
@@ -77,7 +78,7 @@ export const LapTimeLog = () => {
 
   // save current delta target
   useEffect(() => {
-    if (currentLapTime > MIN_LIVE_LAP_TIME && referenceTime && referenceTime > 0) {
+    if (currentLapTime > 0 && referenceTime && referenceTime > 0) {
       referenceAtStartOfLap.current = referenceTime;
     }
   }, [currentLapTime, referenceTime]);
@@ -89,15 +90,23 @@ export const LapTimeLog = () => {
     overall: useTelemetryValue<number>('LapDeltaToSessionBestLap') ?? 0,
   };
   const liveDelta = deltas[settings.config.delta?.method] ?? deltas.bestlap;
-  const predictedLap =
-    referenceTime && referenceTime > 0 ? referenceTime + liveDelta : 0;
+
+  useEffect(() => {
+    setPredictedLap((prev) => {
+      const currentPrediction = (referenceTime && referenceTime > 0) ? (referenceTime + liveDelta) : 0;
+      if (currentPrediction > currentLapTime) {
+        lastValidPrediction.current = currentPrediction;
+        return currentPrediction;
+      }
+      return prev;
+    }); 
+  }, [lapCompleted, currentLapTime, liveDelta, referenceTime]);
 
   // check for dirty lap
   useEffect(() => {
     setIsDirty((prev) => {
-      if (lapCompleted > lapAtLastCheck.current) {
+      if (currentLapTime < 1) {
         incidentsAtLapStart.current = incidentCount;
-        lapAtLastCheck.current = lapCompleted;
         return false;
       }
       if (currentLapTime > 0.5 && !prev) {
@@ -222,8 +231,16 @@ export const LapTimeLogDisplay = ({
         ? overall
         : bestlap;
   const delta = (predicted ?? 0) - (deltalap ?? 0);
-  const deltaIsGreen = delta !== undefined && delta < 0;
-  const deltaIsRed = delta !== undefined && delta > 0;
+  const deltaIsGreen = 
+    current !== undefined && 
+    current > 5 &&
+    delta !== undefined &&    
+    delta < 0;
+  const deltaIsRed = 
+    current !== undefined && 
+    current > 5 &&
+    delta !== undefined &&    
+    delta > 0;
 
   // for the flash
   let bgColor = 'bg-slate-900/[var(--fg-alpha)]';
