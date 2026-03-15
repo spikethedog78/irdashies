@@ -78,12 +78,113 @@ export const LapTimeLog = () => {
     bestLapTime,
   ]);
 
+  // get current delta against chosen target
+  const deltas = {
+    lastlap: useTelemetryValue<number>('LapDeltaToSessionLastlLap') ?? 0,
+    bestlap: useTelemetryValue<number>('LapDeltaToBestLap') ?? 0,
+    overall: useTelemetryValue<number>('LapDeltaToSessionBestLap') ?? 0,
+  };
+  const liveDelta = deltas[settings.config.delta?.method] ?? deltas.bestlap;
+
+  // EFFECT: Session Watcher (Handles resets/restarts)
+  useEffect(() => {
+    const sessionChanged = sessionNum !== prevSessionNum.current;
+    const sessionRestarted = sessionTime < prevSessionTime.current - 5;
+
+    if (sessionChanged || sessionRestarted) {
+      setHistory(() => {
+        return [];
+      });
+      setIsDirty(false);
+      lastLoggedLap.current = -1;
+      lastLoggedTime.current = -1;
+      referenceAtStartOfLap.current = 0;
+    }
+    
+    prevSessionNum.current = sessionNum;
+    prevSessionTime.current = sessionTime;
+  }, [sessionNum, sessionTime]);
+
+  /// EFFECT: Live Lap Prediction & Incidents (Runs throughout the lap)
+  useEffect(() => {
+    const now = Date.now();
+    
+    // 1. Prediction Logic (Throttle to 100ms)
+    if (now - lastPredictionUpdate.current >= 100) {
+      const currentPrediction = referenceAtStartOfLap.current > 0 
+        ? (referenceAtStartOfLap.current + liveDelta) 
+        : 0;
+
+      if (currentPrediction > currentLapTime) {
+        setPredictedLap((prev) => {
+          const currentPrediction = referenceAtStartOfLap.current > 0 ? (referenceAtStartOfLap.current + liveDelta) : 0;
+          if (currentPrediction > currentLapTime) {
+            return currentPrediction;
+          }
+          return prev;
+        }); 
+        lastValidPrediction.current = currentPrediction;
+        lastPredictionUpdate.current = now;
+      }
+    }
+
+    // 2. Incident/Dirty Logic
+    setIsDirty((prev) => {
+      // Reset at start of lap
+      if (currentLapTime < LAP_CHANGE_TIME) {
+        incidentsAtLapStart.current = incidentCount;
+        return false;
+      }
+      // Check for new incidents mid-lap
+      if (!prev) {
+        const offTrack = playerTrackSurface === TRACK_SURFACE_OFF_TRACK;
+        const incidentOccurred = incidentCount > incidentsAtLapStart.current;
+        return offTrack || incidentOccurred;
+      }
+      return prev;
+    });
+
+  }, [currentLapTime, liveDelta, incidentCount, playerTrackSurface]);
+
+    // EFFECT: Lap Completion Logic (Runs once per lap cross)
+  useEffect(() => {
+    if (lapCompleted <= 0) return;
+
+    const isValidTime = lastLapTime > 0 && lastLapTime !== lastLoggedTime.current;
+    
+    if (isValidTime && lapCompleted > lastLoggedLap.current) {
+
+      setHistory((prev) => {
+        // Log new lap
+        if (!isValidTime) return prev;
+        if (prev.some((entry) => entry.lap === lapCompleted)) return prev;
+        const newEntry: LapEntry = {
+          lap: lapCompleted,
+          time: lastLapTime,
+          delta: referenceAtStartOfLap.current
+            ? lastLapTime - referenceAtStartOfLap.current
+            : 0,
+          dirty: isDirty,
+        };
+        return [newEntry, ...prev].slice(0, MAX_HISTORY_ENTRIES);
+      });
+
+      lastLoggedLap.current = lapCompleted;
+      lastLoggedTime.current = lastLapTime;
+      if (referenceTime && referenceTime > 0) {
+        referenceAtStartOfLap.current = referenceTime;
+      }
+    }
+  }, [lapCompleted, isDirty, referenceTime]); // ONLY trigger when the lap number changes
+
+
+  /*
   // save current delta target
   useEffect(() => {
-    if (currentLapTime > 0 && referenceTime && referenceTime > 0) {
+    if (currentLapTime > LAP_CHANGE_TIME && referenceTime && referenceTime > 0) {
       referenceAtStartOfLap.current = referenceTime;
     }
-  }, [currentLapTime, referenceTime]);
+  }, [lapCompleted, referenceTime]);
 
   // get current delta against chosen target
   const deltas = {
@@ -98,7 +199,7 @@ export const LapTimeLog = () => {
     const now = Date.now();
     if (now - lastPredictionUpdate.current >= 100) {
       setPredictedLap((prev) => {
-        const currentPrediction = (referenceTime && referenceTime > 0) ? (referenceTime + liveDelta) : 0;
+        const currentPrediction = referenceAtStartOfLap.current > 0 ? (referenceAtStartOfLap.current + liveDelta) : 0;
         if (currentPrediction > currentLapTime) {
           lastValidPrediction.current = currentPrediction;
           lastPredictionUpdate.current = now;
@@ -107,7 +208,7 @@ export const LapTimeLog = () => {
         return prev;
       }); 
     }
-  }, [lapCompleted, currentLapTime, liveDelta, referenceTime]);
+  }, [lapCompleted, currentLapTime, liveDelta]);
 
   // check for dirty lap
   useEffect(() => {
@@ -161,6 +262,7 @@ export const LapTimeLog = () => {
     prevSessionNum.current = sessionNum;
     prevSessionTime.current = sessionTime;
   }, [sessionNum, sessionTime, lapCompleted, lastLapTime, isDirty]);
+  */
 
   // demo mode
   if (isDemoMode) {
