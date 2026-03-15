@@ -20,7 +20,6 @@ import { formatDelta } from './components/LapTimeRow';
 import { formatTime } from '@irdashies/utils/time';
 
 const TRACK_SURFACE_OFF_TRACK = 4;
-const LAP_CHANGE_TIME = 0.5;
 const FREEZE_TIME = 5;
 const MAX_HISTORY_ENTRIES = 10;
 
@@ -33,7 +32,7 @@ export const LapTimeLog = () => {
   const playerIndex = useFocusCarIdx();
   const { isDriving } = useDrivingState();
   const [history, setHistory] = useState<LapEntry[]>([]);
-  const [isDirty, setIsDirty] = useState(false);
+  const [isDirty, setIsDirty] = useState<boolean>(false);
   const [predictedLap, setPredictedLap] = useState<number>(0);
 
   // get telemetry
@@ -86,26 +85,21 @@ export const LapTimeLog = () => {
   };
   const liveDelta = deltas[settings.config.delta?.method] ?? deltas.bestlap;
 
-  // EFFECT: Session Watcher (Handles resets/restarts)
+  // Handles resets/restarts
   useEffect(() => {
     const sessionChanged = sessionNum !== prevSessionNum.current;
     const sessionRestarted = sessionTime < prevSessionTime.current - 5;
-
     if (sessionChanged || sessionRestarted) {
-      setHistory(() => {
-        return [];
-      });
-      setIsDirty(false);
+      console.log("RESET");
       lastLoggedLap.current = -1;
       lastLoggedTime.current = -1;
       referenceAtStartOfLap.current = 0;
     }
-    
     prevSessionNum.current = sessionNum;
     prevSessionTime.current = sessionTime;
   }, [sessionNum, sessionTime]);
 
-  /// EFFECT: Live Lap Prediction & Incidents (Runs throughout the lap)
+  /// Live Lap Prediction & Incidents
   useEffect(() => {
     const now = Date.now();
     
@@ -114,7 +108,6 @@ export const LapTimeLog = () => {
       const currentPrediction = referenceAtStartOfLap.current > 0 
         ? (referenceAtStartOfLap.current + liveDelta) 
         : 0;
-
       if (currentPrediction > currentLapTime) {
         setPredictedLap((prev) => {
           const currentPrediction = referenceAtStartOfLap.current > 0 ? (referenceAtStartOfLap.current + liveDelta) : 0;
@@ -130,12 +123,9 @@ export const LapTimeLog = () => {
 
     // 2. Incident/Dirty Logic
     setIsDirty((prev) => {
-      // Reset at start of lap
-      if (currentLapTime < LAP_CHANGE_TIME) {
-        incidentsAtLapStart.current = incidentCount;
+      if (lastLoggedLap.current < 0) {
         return false;
       }
-      // Check for new incidents mid-lap
       if (!prev) {
         const offTrack = playerTrackSurface === TRACK_SURFACE_OFF_TRACK;
         const incidentOccurred = incidentCount > incidentsAtLapStart.current;
@@ -146,36 +136,40 @@ export const LapTimeLog = () => {
 
   }, [currentLapTime, liveDelta, incidentCount, playerTrackSurface]);
 
-    // EFFECT: Lap Completion Logic (Runs once per lap cross)
+  // Lap Completion Logic
   useEffect(() => {
-    if (lapCompleted <= 0) return;
-
-    const isValidTime = lastLapTime > 0 && lastLapTime !== lastLoggedTime.current;
-    
-    if (isValidTime && lapCompleted > lastLoggedLap.current) {
-
-      setHistory((prev) => {
-        // Log new lap
-        if (!isValidTime) return prev;
-        if (prev.some((entry) => entry.lap === lapCompleted)) return prev;
-        const newEntry: LapEntry = {
-          lap: lapCompleted,
-          time: lastLapTime,
-          delta: referenceAtStartOfLap.current
-            ? lastLapTime - referenceAtStartOfLap.current
-            : 0,
-          dirty: isDirty,
-        };
-        return [newEntry, ...prev].slice(0, MAX_HISTORY_ENTRIES);
-      });
-
+    const isNewLap = lapCompleted > 0 && lapCompleted > lastLoggedLap.current; 
+    if (!isNewLap) return;
+    setHistory((prev) => {
+      console.log("A");
+      // Reset history if session changed
+      if (lastLoggedLap.current < 0) {
+        lastLoggedLap.current = lapCompleted;
+        return [];
+      }
+      console.log("B");
+      // Log new lap
+      if (prev.some((entry) => entry.lap === lapCompleted)) return prev;
+      const isValidTime =
+      lastLapTime > 0 && lastLapTime !== lastLoggedTime.current;
+      console.log("C" + lastLapTime + lastLoggedTime.current);
+      if (!isValidTime) return prev;
       lastLoggedLap.current = lapCompleted;
       lastLoggedTime.current = lastLapTime;
-      if (referenceTime && referenceTime > 0) {
-        referenceAtStartOfLap.current = referenceTime;
-      }
-    }
-  }, [lapCompleted, isDirty, referenceTime]); // ONLY trigger when the lap number changes
+      referenceAtStartOfLap.current = referenceTime ?? 0;
+      incidentsAtLapStart.current = incidentCount ?? 0;
+      console.log("D");
+      const newEntry: LapEntry = {
+        lap: lapCompleted,
+        time: lastLapTime,
+        delta: referenceAtStartOfLap.current
+          ? lastLapTime - referenceAtStartOfLap.current
+          : 0,
+        dirty: isDirty,
+      };
+      return [newEntry, ...prev].slice(0, MAX_HISTORY_ENTRIES);
+    });
+  }, [lapCompleted, lastLapTime, isDirty, incidentCount, referenceTime]);
 
 
   /*
