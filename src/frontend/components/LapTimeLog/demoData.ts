@@ -22,7 +22,7 @@ export const getDemoLapTimeLogData = (): LapTimeLogDemoData => {
     "current": 84.010,
     "lastlap": 85.249,
     "bestlap": 82.401,
-    "predicted": 82.300,
+    "predicted": 84.600,
     "overall": 82.301,
     "dirty": false,
     "history": [
