@@ -837,6 +837,8 @@ export const defaultDashboard: {
       },
       config: {
         scale: 100,
+        alignment: 'top',
+        reverse: false,
         showCurrentLap: true,
         showPredictedLap: true,
         showLastLap: true,

@@ -35,6 +35,8 @@ const mockConfig = (
     background: { opacity: 80 },
     foreground: { opacity: 70 },
     scale: 100,
+    alignment: 'top',
+    reverse: false,
     showCurrentLap: true,
     showPredictedLap: true,
     showLastLap: true,

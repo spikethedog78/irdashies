@@ -13,6 +13,8 @@ const mockSettings = (
     background: { opacity: 80 },
     foreground: { opacity: 70 },
     scale: 100,
+    alignment: 'top',
+    reverse: false,
     showCurrentLap: true,
     showPredictedLap: true,
     showLastLap: true,
@@ -73,11 +75,11 @@ describe('LapTimeLog helpers', () => {
     });
 
     it('should format positive delta', () => {
-      expect(formatDelta(1.234)).toBe('+1.234');
+      expect(formatDelta(1.234)).toBe('+1.23');
     });
 
     it('should format negative delta', () => {
-      expect(formatDelta(-0.567)).toBe('-0.567');
+      expect(formatDelta(-0.567)).toBe('-0.57');
     });
   });
 });
@@ -93,7 +95,7 @@ describe('LapTimeRow', () => {
     render(
       <LapTimeRow label="LAST" time={90.123} delta={-0.5} settings={mockSettings()} />
     );
-    expect(screen.getByText('-0.500')).toBeInTheDocument();
+    expect(screen.getByText('-0.50')).toBeInTheDocument();
   });
 
   it('hides delta when disabled in settings', () => {
@@ -101,7 +103,7 @@ describe('LapTimeRow', () => {
     render(
       <LapTimeRow label="LAST" time={90.123} delta={-0.5} settings={settings} />
     );
-    expect(screen.queryByText('-0.500')).not.toBeInTheDocument();
+    expect(screen.queryByText('-0.50')).not.toBeInTheDocument();
   });
 
   it('applies green color for personal best lap', () => {
@@ -138,7 +140,7 @@ describe('LapTimeLogDisplay', () => {
 
     expect(screen.getByText('0:10.500')).toBeInTheDocument(); // Current
     expect(screen.getByText('1:31.300')).toBeInTheDocument(); // Predicted
-    expect(screen.getByText('-0.200')).toBeInTheDocument(); // Predicted Delta
+    expect(screen.getByText('-0.20')).toBeInTheDocument(); // Predicted Delta
     expect(screen.getByText('LAST')).toBeInTheDocument();
     expect(screen.getByText('BEST')).toBeInTheDocument();
     expect(screen.getByText('LAP 10')).toBeInTheDocument();

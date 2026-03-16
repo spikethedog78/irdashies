@@ -53,8 +53,7 @@ export const LapTimeLog = () => {
   const prevSessionTime = useRef<number>(sessionTime);
   const referenceAtStartOfLap = useRef<number>(0);
   const incidentsAtLapStart = useRef<number>(incidentCount);
-  const lastValidPrediction = useRef(0);
-  const lastPredictionUpdate = useRef(0);
+  const lastPredictionUpdate = useRef<number>(0);
 
   // calculate overall best
   const sessionBestOverall = useMemo(() => {
@@ -85,47 +84,37 @@ export const LapTimeLog = () => {
   };
   const liveDelta = deltas[settings.config.delta?.method] ?? deltas.bestlap;
 
-  // Handles resets/restarts
+  // 1. handles resets/restarts
   useEffect(() => {
     const sessionChanged = sessionNum !== prevSessionNum.current;
     const sessionRestarted = sessionTime < prevSessionTime.current - 5;
-    if (sessionChanged || sessionRestarted) {
-      console.log("RESET");
+    if (sessionChanged || sessionRestarted) {  
       lastLoggedLap.current = -1;
       lastLoggedTime.current = -1;
-      referenceAtStartOfLap.current = 0;
+      setTimeout(() => setIsDirty(false), 0);
+      setTimeout(() => setPredictedLap(0), 0);
+      setTimeout(() => setHistory([]), 0);
     }
     prevSessionNum.current = sessionNum;
     prevSessionTime.current = sessionTime;
   }, [sessionNum, sessionTime]);
 
-  /// Live Lap Prediction & Incidents
+  /// 2. live tracking during the lap
   useEffect(() => {
-    const now = Date.now();
-    
-    // 1. Prediction Logic (Throttle to 100ms)
-    if (now - lastPredictionUpdate.current >= 100) {
-      const currentPrediction = referenceAtStartOfLap.current > 0 
-        ? (referenceAtStartOfLap.current + liveDelta) 
-        : 0;
-      if (currentPrediction > currentLapTime) {
-        setPredictedLap((prev) => {
-          const currentPrediction = referenceAtStartOfLap.current > 0 ? (referenceAtStartOfLap.current + liveDelta) : 0;
-          if (currentPrediction > currentLapTime) {
-            return currentPrediction;
-          }
-          return prev;
-        }); 
-        lastValidPrediction.current = currentPrediction;
-        lastPredictionUpdate.current = now;
-      }
+    const now = Date.now();    
+    // 2a. prediction Logic (throttle to 100ms)
+    if (now - lastPredictionUpdate.current >= 100) {      
+      setPredictedLap((prev) => {
+        const currentPrediction = referenceAtStartOfLap.current > 0 ? (referenceAtStartOfLap.current + liveDelta) : 0;
+        if (currentPrediction > currentLapTime) {
+          lastPredictionUpdate.current = now;
+          return currentPrediction;
+        }
+        return prev;
+      });       
     }
-
-    // 2. Incident/Dirty Logic
+    // 2b. incident/dirty lap logic
     setIsDirty((prev) => {
-      if (lastLoggedLap.current < 0) {
-        return false;
-      }
       if (!prev) {
         const offTrack = playerTrackSurface === TRACK_SURFACE_OFF_TRACK;
         const incidentOccurred = incidentCount > incidentsAtLapStart.current;
@@ -133,32 +122,17 @@ export const LapTimeLog = () => {
       }
       return prev;
     });
-
   }, [currentLapTime, liveDelta, incidentCount, playerTrackSurface]);
 
-  // Lap Completion Logic
-  useEffect(() => {
-    const isNewLap = lapCompleted > 0 && lapCompleted > lastLoggedLap.current; 
-    if (!isNewLap) return;
+  // 3. lap completion Logic
+  useEffect(() => {    
     setHistory((prev) => {
-      console.log("A");
-      // Reset history if session changed
-      if (lastLoggedLap.current < 0) {
-        lastLoggedLap.current = lapCompleted;
-        return [];
-      }
-      console.log("B");
-      // Log new lap
+      // check for new lap      
+      const isNewLap = lapCompleted > 0 && lapCompleted > lastLoggedLap.current; 
+      const isValidTime = lastLapTime > 0 && lastLapTime !== lastLoggedTime.current;      
+      if (!isNewLap || !isValidTime) return prev;     
       if (prev.some((entry) => entry.lap === lapCompleted)) return prev;
-      const isValidTime =
-      lastLapTime > 0 && lastLapTime !== lastLoggedTime.current;
-      console.log("C" + lastLapTime + lastLoggedTime.current);
-      if (!isValidTime) return prev;
-      lastLoggedLap.current = lapCompleted;
-      lastLoggedTime.current = lastLapTime;
-      referenceAtStartOfLap.current = referenceTime ?? 0;
-      incidentsAtLapStart.current = incidentCount ?? 0;
-      console.log("D");
+      // add history 
       const newEntry: LapEntry = {
         lap: lapCompleted,
         time: lastLapTime,
@@ -167,10 +141,15 @@ export const LapTimeLog = () => {
           : 0,
         dirty: isDirty,
       };
+      // reset for new lap
+      lastLoggedLap.current = lapCompleted;
+      lastLoggedTime.current = lastLapTime;
+      referenceAtStartOfLap.current = referenceTime ?? 0;
+      incidentsAtLapStart.current = incidentCount;
+      setTimeout(() => setIsDirty(false), 0);
       return [newEntry, ...prev].slice(0, MAX_HISTORY_ENTRIES);
     });
   }, [lapCompleted, lastLapTime, isDirty, incidentCount, referenceTime]);
-
 
   /*
   // save current delta target
@@ -365,121 +344,127 @@ export const LapTimeLogDisplay = ({
     if (isSessionBest) bgColor = 'bg-purple-800';
   }
 
+  // wdiget alignment
+  const alignment = settings.config.alignment === 'bottom' ? 'items-end' : 'items-start';
+  const reverse = settings.config.reverse ? 'flex-col-reverse' : 'flex-col';
+
   return (
-    <div
-      className="w-full text-sm bg-slate-800/[var(--bg-opacity)] rounded-md p-1 text-white"
-      style={
-        {
-          '--bg-opacity': `${settings.config.background.opacity}%`,
-        } as React.CSSProperties
-      }
-    >
+    <div className={`h-full flex ${alignment}`}>
       <div
-        className="w-full flex flex-col gap-0.5"
+        className="w-full text-sm bg-slate-800/[var(--bg-opacity)] rounded-md p-1 text-white"
         style={
-          { 'fontSize': `${settings.config.scale}%` } as React.CSSProperties
+          {
+            '--bg-opacity': `${settings.config.background.opacity}%`,
+          } as React.CSSProperties
         }
       >
-        {/* Current Lap Timer (The Big One) */}
-        {settings.config.showCurrentLap && (
-          <div
-            id="current-lap"
-            className={`text-[1.8em] w-full p-1 ${bgColor} flex relative items-center justify-center rounded-sm transition-colors duration-500`}
-            style={
-              {
-                '--fg-alpha': `${settings?.config.foreground.opacity}%`,
-              } as React.CSSProperties
-            }
-          >
-            <div className="absolute left-2">
-              <TimerIcon weight="bold" />
-            </div>
-            <div className="w-full text-center tabular-nums">
-              {formatTime(
-                current !== undefined && current > FREEZE_TIME ? current : lastlap
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Predicted (With Delta) */}
-        {settings.config.showPredictedLap && (
-          <div
-            id="predicted-lap"
-            className={`text-[1.3em] w-full p-1 ${dirty ? 'text-zinc-400' : 'text-white'} bg-slate-900/[var(--fg-alpha)] flex relative items-center justify-center rounded-sm`}
-            style={
-              {
-                '--fg-alpha': `${settings?.config.foreground.opacity / 2}%`,
-              } as React.CSSProperties
-            }
-          >
-            <div className="absolute left-3">
-              {dirty ? (
-                <XIcon weight="regular" />
-              ) : (
-                <TargetIcon weight="regular" />
-              )}
-            </div>
-            <div className="w-full text-center tabular-nums">
-              {formatTime(
-                current !== undefined && current > FREEZE_TIME ? predicted : lastlap
-              )}
-            </div>
-            {settings.config.delta?.enabled && (
-              <div
-                className={`absolute right-2 text-center tabular-nums ${
-                  !dirty && deltaIsGreen
-                    ? 'text-green-400'
-                    : !dirty && deltaIsRed
-                      ? 'text-red-400'
-                      : 'text-zinc-400'
-                }`}
-              >
-                {formatDelta(current !== undefined && current > FREEZE_TIME ? delta : 0)}
+        <div
+          className={`w-full flex gap-0.5 ${reverse}`}
+          style={
+            { 'fontSize': `${settings.config.scale}%` } as React.CSSProperties
+          }
+        >
+          {/* Current Lap Timer (The Big One) */}
+          {settings.config.showCurrentLap && (
+            <div
+              id="current-lap"
+              className={`text-[1.8em] w-full p-1 ${bgColor} flex relative items-center justify-center rounded-sm transition-colors duration-500`}
+              style={
+                {
+                  '--fg-alpha': `${settings?.config.foreground.opacity}%`,
+                } as React.CSSProperties
+              }
+            >
+              <div className="absolute left-2">
+                <TimerIcon weight="bold" />
               </div>
-            )}
-          </div>
-        )}
+              <div className="w-full text-center tabular-nums">
+                {formatTime(
+                  current !== undefined && current > FREEZE_TIME ? current : lastlap
+                )}
+              </div>
+            </div>
+          )}
 
-        {/* Main Stats */}
-        {settings.config.showLastLap && (
-          <LapTimeRow
-            label="LAST"
-            time={lastlap}
-            delta={(lastlap ?? 0) - (deltalap ?? 0)}
-            best={bestlap}
-            overall={overall}
-            settings={settings}
-          />
-        )}
-        {settings.config.showBestLap && (
-          <LapTimeRow
-            label="BEST"
-            time={bestlap}
-            delta={(bestlap ?? 0) - (deltalap ?? 0)}
-            best={bestlap}
-            overall={overall}
-            settings={settings}
-          />
-        )}
+          {/* Predicted (With Delta) */}
+          {settings.config.showPredictedLap && (
+            <div
+              id="predicted-lap"
+              className={`text-[1.3em] w-full p-1 ${dirty ? 'text-zinc-400' : 'text-white'} bg-slate-900/[var(--fg-alpha)] flex relative items-center justify-center rounded-sm`}
+              style={
+                {
+                  '--fg-alpha': `${settings?.config.foreground.opacity / 2}%`,
+                } as React.CSSProperties
+              }
+            >
+              <div className="absolute left-3">
+                {dirty ? (
+                  <XIcon weight="regular" />
+                ) : (
+                  <TargetIcon weight="regular" />
+                )}
+              </div>
+              <div className="w-full text-center tabular-nums">
+                {formatTime(
+                  current !== undefined && current > FREEZE_TIME ? predicted : lastlap
+                )}
+              </div>
+              {settings.config.delta?.enabled && (
+                <div
+                  className={`absolute right-2 text-center tabular-nums ${
+                    !dirty && deltaIsGreen
+                      ? 'text-green-400'
+                      : !dirty && deltaIsRed
+                        ? 'text-red-400'
+                        : 'text-zinc-400'
+                  }`}
+                >
+                  {formatDelta(current !== undefined && current > FREEZE_TIME ? delta : 0)}
+                </div>
+              )}
+            </div>
+          )}
 
-        {/* History List */}
-        {settings.config.history?.enabled && (
-          <>
-            {sortedHistory.map((entry) => (
-              <LapTimeRow
-                key={entry.lap} // Critical for React performance
-                label={`LAP ${entry.lap}`}
-                time={entry.time}
-                delta={entry.delta}
-                dirty={entry.dirty}
-                best={bestlap}
-                overall={overall}
-                settings={settings}
-              />
-            ))}
-          </>
-        )}
+          {/* Main Stats */}
+          {settings.config.showLastLap && (
+            <LapTimeRow
+              label="LAST"
+              time={lastlap}
+              delta={(lastlap ?? 0) - (deltalap ?? 0)}
+              best={bestlap}
+              overall={overall}
+              settings={settings}
+            />
+          )}
+          {settings.config.showBestLap && (
+            <LapTimeRow
+              label="BEST"
+              time={bestlap}
+              delta={(bestlap ?? 0) - (deltalap ?? 0)}
+              best={bestlap}
+              overall={overall}
+              settings={settings}
+            />
+          )}
+
+          {/* History List */}
+          {settings.config.history?.enabled && (
+            <>
+              {sortedHistory.map((entry) => (
+                <LapTimeRow
+                  key={entry.lap} // Critical for React performance
+                  label={`LAP ${entry.lap}`}
+                  time={entry.time}
+                  delta={entry.delta}
+                  dirty={entry.dirty}
+                  best={bestlap}
+                  overall={overall}
+                  settings={settings}
+                />
+              ))}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

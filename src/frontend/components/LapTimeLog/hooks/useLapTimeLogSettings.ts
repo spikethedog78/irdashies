@@ -5,6 +5,8 @@ const DEFAULT_CONFIG: LapTimeLogWidgetSettings = {
   enabled: false,
   config: {
     scale: 100,
+    alignment: 'top',
+    reverse: false,
     showCurrentLap: true,
     showPredictedLap: true,
     showLastLap: true,
@@ -57,6 +59,8 @@ export const useLapTimeLogSettings = () => {
             DEFAULT_CONFIG.config.foreground.opacity,
         },
         scale: saved.config?.scale ?? DEFAULT_CONFIG.config.scale,
+        alignment: saved.config?.alignment ?? DEFAULT_CONFIG.config.alignment,
+        reverse: saved.config?.reverse ?? DEFAULT_CONFIG.config.reverse,
         showCurrentLap: saved.config?.showCurrentLap ?? DEFAULT_CONFIG.config.showCurrentLap,
         showPredictedLap: saved.config?.showPredictedLap ?? DEFAULT_CONFIG.config.showPredictedLap,
         showLastLap: saved.config?.showLastLap ?? DEFAULT_CONFIG.config.showLastLap,

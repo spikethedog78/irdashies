@@ -251,6 +251,33 @@ export const LapTimeLogSettings = () => {
                   }
                 />  
 
+                <SettingToggleRow
+                  title="Reverse Order"
+                  description="Display the lap time elements in reverse order"
+                  enabled={settings.config.reverse ?? false}
+                  onToggle={(v) =>
+                    handleConfigChange({
+                      reverse: v,
+                    })
+                  }
+                />     
+
+                <SettingButtonGroupRow<'top' | 'bottom'>
+                  title="Widget Alignment"  
+                  value={
+                    settings.config.alignment ?? 'top'
+                  }
+                  options={[
+                    { label: 'Top', value: 'top' },
+                    { label: 'Bottom', value: 'bottom' },                    
+                  ]}
+                  onChange={(v) =>
+                    handleConfigChange({
+                      alignment: v,
+                    })
+                  }
+                />
+
               </SettingsSection>
             )}
 
